@@ -186,17 +186,17 @@ class _DesignDashboardScreenState extends State<DesignDashboardScreen> {
   }
 
   void _openProject(ProjectModel project) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => const ProjectEditorScreen(projectId: project.id)));
+    Navigator.push(context, MaterialPageRoute(builder: (_) => ProjectEditorScreen(projectId: project.id)));
   }
 
   Widget _buildTemplateCategories() {
     final templates = [
-      ('Modern 1BHK', Icons.apartment, Colors.teal, 30, 40),
-      ('Luxury Villa', Icons.villa, Colors.amber.shade700, 60, 80),
-      ('Minimal Studio', Icons.crib, Colors.blue, 20, 30),
-      ('Indian Style', Icons.temple_hindu, Colors.deepOrange, 40, 50),
-      ('Duplex House', Icons.home_work, Colors.indigo, 50, 60),
-      ('Office Space', Icons.business, Colors.green.shade700, 30, 50),
+      ('Modern 1BHK', Icons.apartment, Colors.teal, 30.0, 40.0),
+      ('Luxury Villa', Icons.villa, Colors.amber.shade700, 60.0, 80.0),
+      ('Minimal Studio', Icons.crib, Colors.blue, 20.0, 30.0),
+      ('Indian Style', Icons.temple_hindu, Colors.deepOrange, 40.0, 50.0),
+      ('Duplex House', Icons.home_work, Colors.indigo, 50.0, 60.0),
+      ('Office Space', Icons.business, Colors.green.shade700, 30.0, 50.0),
     ];
 
     return SingleChildScrollView(

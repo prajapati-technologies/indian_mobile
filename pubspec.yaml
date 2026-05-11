@@ -58,6 +58,7 @@ dependencies:
   glass_kit: ^4.0.2
   carousel_slider: ^5.1.2
   url_launcher: ^6.3.1
+  vector_math: ^2.1.4
 
 dev_dependencies:
   flutter_test:

@@ -7,6 +7,7 @@ class SmartPainter extends CustomPainter {
   final WallModel? tempWall;
   final dynamic selectedObject;
   final double gridSize;
+  final List<RoomData> rooms;
 
   SmartPainter({
     required this.walls,
@@ -14,19 +15,45 @@ class SmartPainter extends CustomPainter {
     this.tempWall,
     this.selectedObject,
     this.gridSize = 25.0,
+    this.rooms = const [],
   });
 
   @override
   void paint(Canvas canvas, Size size) {
+    _drawRooms(canvas);
     _drawGrid(canvas, size);
     _drawWalls(canvas);
     _drawFurniture(canvas);
     if (tempWall != null) _drawTempWall(canvas);
   }
 
+  void _drawRooms(Canvas canvas) {
+    for (var room in rooms) {
+      final paint = Paint()
+        ..color = room.color.withValues(alpha: 0.3)
+        ..style = PaintingStyle.fill;
+      canvas.drawRect(room.rect, paint);
+
+      final center = room.rect.center;
+      final tp = TextPainter(
+        text: TextSpan(
+          text: room.label,
+          style: TextStyle(
+            color: room.color.withValues(alpha: 0.8),
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      );
+      tp.layout();
+      tp.paint(canvas, center - Offset(tp.width / 2, tp.height / 2));
+    }
+  }
+
   void _drawGrid(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.grey.withOpacity(0.15)
+      ..color = Colors.grey.withValues(alpha: 0.15)
       ..strokeWidth = 0.5;
 
     for (double x = 0; x <= size.width; x += gridSize) {
@@ -45,11 +72,8 @@ class SmartPainter extends CustomPainter {
         ..strokeWidth = wall.thickness
         ..strokeCap = StrokeCap.round;
       canvas.drawLine(wall.start, wall.end, paint);
-      
-      // Draw Openings (Doors/Windows)
-      _drawOpenings(canvas, wall);
 
-      // Draw measurement text
+      _drawOpenings(canvas, wall);
       _drawMeasurement(canvas, wall);
     }
   }
@@ -58,7 +82,7 @@ class SmartPainter extends CustomPainter {
     for (var op in wall.openings) {
       final pos = wall.start + (wall.end - wall.start) * op.position;
       final angle = (wall.end - wall.start).direction;
-      
+
       final paint = Paint()
         ..color = op.type == OpeningType.door ? Colors.brown : Colors.lightBlueAccent
         ..style = PaintingStyle.fill;
@@ -66,24 +90,22 @@ class SmartPainter extends CustomPainter {
       canvas.save();
       canvas.translate(pos.dx, pos.dy);
       canvas.rotate(angle);
-      
+
       if (op.type == OpeningType.door) {
-        // Door shape (swing)
         canvas.drawRect(Rect.fromCenter(center: Offset.zero, width: op.width, height: wall.thickness + 2), paint);
         final swingPaint = Paint()..color = Colors.brown..style = PaintingStyle.stroke..strokeWidth = 1;
         canvas.drawArc(Rect.fromCircle(center: Offset(-op.width/2, 0), radius: op.width), 0, -1.5, false, swingPaint);
       } else {
-        // Window shape
         canvas.drawRect(Rect.fromCenter(center: Offset.zero, width: op.width, height: wall.thickness - 2), paint);
       }
-      
+
       canvas.restore();
     }
   }
 
   void _drawTempWall(Canvas canvas) {
     final paint = Paint()
-      ..color = Colors.blue.withOpacity(0.5)
+      ..color = Colors.blue.withValues(alpha: 0.5)
       ..strokeWidth = 15.0
       ..strokeCap = StrokeCap.round;
     canvas.drawLine(tempWall!.start, tempWall!.end, paint);
@@ -93,9 +115,9 @@ class SmartPainter extends CustomPainter {
     for (var f in furniture) {
       final isSelected = selectedObject == f;
       final paint = Paint()
-        ..color = isSelected ? Colors.blue.withOpacity(0.5) : Colors.orange.withOpacity(0.5)
+        ..color = (isSelected ? Colors.blue : Colors.orange).withValues(alpha: 0.5)
         ..style = PaintingStyle.fill;
-      
+
       final borderPaint = Paint()
         ..color = isSelected ? Colors.blue : Colors.orange
         ..style = PaintingStyle.stroke
@@ -104,22 +126,21 @@ class SmartPainter extends CustomPainter {
       canvas.save();
       canvas.translate(f.position.dx, f.position.dy);
       canvas.rotate(f.rotation);
-      
+
       final rect = Rect.fromCenter(center: Offset.zero, width: f.width, height: f.height);
       canvas.drawRect(rect, paint);
       canvas.drawRect(rect, borderPaint);
-      
-      // Draw Label
+
       _drawText(canvas, f.type.toUpperCase(), Offset.zero);
-      
+
       canvas.restore();
     }
   }
 
   void _drawMeasurement(Canvas canvas, WallModel wall) {
-    final dist = (wall.start - wall.end).distance / 20; // 20 units = 1m
+    final dist = (wall.start - wall.end).distance / 10;
     final center = Offset((wall.start.dx + wall.end.dx) / 2, (wall.start.dy + wall.end.dy) / 2);
-    _drawText(canvas, "${dist.toStringAsFixed(1)}m", center + const Offset(0, -15));
+    _drawText(canvas, "${dist.toStringAsFixed(0)}ft", center + const Offset(0, -15));
   }
 
   void _drawText(Canvas canvas, String text, Offset position) {

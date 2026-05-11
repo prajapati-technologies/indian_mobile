@@ -50,7 +50,7 @@ class WallModel {
   Offset start;
   Offset end;
   final double thickness;
-  final Color color;
+  Color color;
   List<OpeningModel> openings;
 
   WallModel({
@@ -106,6 +106,14 @@ class OpeningModel {
       width: json['width'].toDouble(),
     );
   }
+}
+
+class RoomData {
+  final Rect rect;
+  final Color color;
+  final String label;
+
+  RoomData({required this.rect, required this.color, required this.label});
 }
 
 class FurnitureModel {
