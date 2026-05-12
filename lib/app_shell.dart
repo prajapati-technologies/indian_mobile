@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'config/app_config.dart';
 import 'screens/account_page.dart';
-import 'screens/categories_page.dart';
 import 'screens/feed_page.dart';
-import 'screens/games_page.dart';
 import 'screens/tools_page.dart';
 import 'screens/local_explorer/local_explorer_screen.dart';
 import 'services/api_service.dart';
