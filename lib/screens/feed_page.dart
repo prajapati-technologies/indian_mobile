@@ -39,48 +39,44 @@ class _FeedPageState extends State<FeedPage> {
   static const int _newsBatchSize = 15;
 
   bool _loading = true;
+  bool _loadingMore = false;
+  int _currentPage = 1;
+  int _lastPage = 1;
   String? _error;
   bool _connectionError = false;
   List<dynamic> _banners = [];
   List<dynamic> _news = [];
   List<dynamic> _categories = [];
-  /// How many news rows to show from [_news] (starts at 4, grows with Load More).
-  int _newsVisibleCount = _newsBatchSize;
 
-  /// View mode: 0 for List, 1 for Reels
-  int _viewMode = 0;
+  /// View mode: 1 for Reels, 0 for List (Default Reels as per user request)
+  int _viewMode = 1;
 
   // AdMob State
   BannerAd? _bannerAd;
   bool _isBannerLoaded = false;
+  final ScrollController _scrollController = ScrollController();
 
   String get _logoUrl => '${widget.webOrigin}/images/site-logo.png';
 
-  int get _newsVisibleEnd {
-    if (_news.isEmpty) {
-      return 0;
-    }
-    final n = _news.length;
-    return _newsVisibleCount < n ? _newsVisibleCount : n;
-  }
-
-  bool get _hasMoreNewsToShow => _newsVisibleEnd < _news.length;
+  bool get _hasMoreNewsToShow => _currentPage < _lastPage;
 
   Future<void> _load() async {
     setState(() {
       _loading = true;
       _error = null;
+      _currentPage = 1;
     });
     try {
       final b = await widget.api.getJson('/banners') as Map<String, dynamic>;
-      final n = await widget.api.getJson('/news') as Map<String, dynamic>;
+      final n = await widget.api.getJson('/news?page=1') as Map<String, dynamic>;
       final c = await widget.api.getJson('/categories') as Map<String, dynamic>;
 
       setState(() {
         _banners = (b['data'] as List<dynamic>?) ?? [];
         _news = (n['data'] as List<dynamic>?) ?? [];
+        _currentPage = (n['current_page'] as int?) ?? 1;
+        _lastPage = (n['last_page'] as int?) ?? 1;
         _categories = (c['data'] as List<dynamic>?) ?? [];
-        _newsVisibleCount = _newsBatchSize;
         _connectionError = false;
         _loading = false;
       });
@@ -89,6 +85,29 @@ class _FeedPageState extends State<FeedPage> {
         _connectionError = e is ApiConnectionException;
         _error = e is ApiConnectionException ? e.message : e.toString();
         _loading = false;
+      });
+    }
+  }
+
+  Future<void> _loadMoreNews() async {
+    if (_loadingMore || !_hasMoreNewsToShow) return;
+    setState(() {
+      _loadingMore = true;
+    });
+    try {
+      final nextPage = _currentPage + 1;
+      final n = await widget.api.getJson('/news?page=$nextPage') as Map<String, dynamic>;
+      
+      setState(() {
+        final newItems = (n['data'] as List<dynamic>?) ?? [];
+        _news.addAll(newItems);
+        _currentPage = (n['current_page'] as int?) ?? nextPage;
+        _lastPage = (n['last_page'] as int?) ?? nextPage;
+        _loadingMore = false;
+      });
+    } catch (e) {
+      setState(() {
+        _loadingMore = false;
       });
     }
   }
@@ -626,7 +645,7 @@ class _FeedPageState extends State<FeedPage> {
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 final i = index + 5;
-                if (i >= _newsVisibleEnd) return null;
+                if (i >= _news.length) return null;
                 final row = _news[i] as Map<String, dynamic>;
                 return Column(
                   children: [
@@ -642,31 +661,29 @@ class _FeedPageState extends State<FeedPage> {
                         );
                       },
                     ),
-                    if (i < _newsVisibleEnd - 1)
+                    if (i < _news.length - 1)
                       const Divider(height: 1, indent: 16, endIndent: 16, color: AppColors.borderLight),
                   ],
                 );
               },
-              childCount: _newsVisibleEnd - 5,
+              childCount: _news.length - 5,
             ),
           ),
 
-        if (_hasMoreNewsToShow && _news.length > _newsVisibleEnd)
+        if (_hasMoreNewsToShow)
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               child: OutlinedButton(
-                onPressed: () {
-                  setState(() {
-                    _newsVisibleCount += _newsBatchSize;
-                  });
-                },
+                onPressed: _loadingMore ? null : _loadMoreNews,
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.brandNavy,
                   side: const BorderSide(color: AppColors.brandNavy),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
-                child: const Text('Load More'),
+                child: _loadingMore 
+                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Text('Load More'),
               ),
             ),
           ),
