@@ -491,6 +491,22 @@ class _UtilityToolsListState extends State<_UtilityToolsList> {
         return Icons.line_weight; // fallback for barcode since barcode_reader might not exist in older flutter
       case 'password-generator':
         return Icons.password;
+      case 'password-strength':
+        return Icons.shield_outlined;
+      case 'hash-generator':
+        return Icons.tag;
+      case 'base64-encode-decode':
+        return Icons.abc;
+      case 'image-watermark':
+        return Icons.branding_watermark;
+      case 'meme-maker':
+        return Icons.emoji_emotions_outlined;
+      case 'image-to-pdf':
+        return Icons.image;
+      case 'pdf-watermark':
+        return Icons.water_drop;
+      case 'pdf-password-protect':
+        return Icons.lock_outline;
       default:
         return Icons.handyman_outlined;
     }

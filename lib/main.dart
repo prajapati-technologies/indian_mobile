@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:indian_mobile/app_shell.dart';
 import 'package:indian_mobile/theme/app_theme.dart';
 import 'package:indian_mobile/providers/canvas_provider.dart';
+import 'package:indian_mobile/providers/local_explorer_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,6 +15,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CanvasProvider()),
+        ChangeNotifierProvider(create: (_) => LocalExplorerProvider()),
       ],
       child: const IndianInfoApp(),
     ),

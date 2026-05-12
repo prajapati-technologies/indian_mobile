@@ -6,17 +6,21 @@ class CanvasProvider extends ChangeNotifier {
   List<WallModel> walls = [];
   List<FurnitureModel> furniture = [];
   List<RoomData> rooms = [];
+  double plotWidthFt = 0;
+  double plotHeightFt = 0;
 
   dynamic selectedObject;
+  int? selectedRoomIndex;
 
   bool isDrawingWall = false;
   WallModel? tempWall;
 
   double scale = 1.0;
   Offset offset = Offset.zero;
-  double gridSize = 25.0;
+  double gridSize = 50.0;
   bool snapToGrid = true;
 
+  int _furnitureId = 0;
   final List<_CanvasSnapshot> _undoStack = [];
   final List<_CanvasSnapshot> _redoStack = [];
   static const int _maxUndoSteps = 30;
@@ -43,7 +47,9 @@ class CanvasProvider extends ChangeNotifier {
   void undo() {
     if (_undoStack.isEmpty) return;
     final s = _undoStack.removeLast();
-    _redoStack.add(_CanvasSnapshot(walls: List.from(walls), furniture: List.from(furniture), rooms: List.from(rooms)));
+    _redoStack.add(_CanvasSnapshot(
+      walls: List.from(walls), furniture: List.from(furniture), rooms: List.from(rooms),
+    ));
     walls = s.walls; furniture = s.furniture; rooms = s.rooms;
     selectedObject = null;
     notifyListeners();
@@ -52,7 +58,9 @@ class CanvasProvider extends ChangeNotifier {
   void redo() {
     if (_redoStack.isEmpty) return;
     final s = _redoStack.removeLast();
-    _undoStack.add(_CanvasSnapshot(walls: List.from(walls), furniture: List.from(furniture), rooms: List.from(rooms)));
+    _undoStack.add(_CanvasSnapshot(
+      walls: List.from(walls), furniture: List.from(furniture), rooms: List.from(rooms),
+    ));
     walls = s.walls; furniture = s.furniture; rooms = s.rooms;
     selectedObject = null;
     notifyListeners();
@@ -64,155 +72,126 @@ class CanvasProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void initializePlot(double widthFeet, double heightFeet) {
+  void initializePlot(double widthFt, double heightFt) {
+    plotWidthFt = widthFt;
+    plotHeightFt = heightFt;
     walls.clear();
     furniture.clear();
     rooms.clear();
     _undoStack.clear();
     _redoStack.clear();
     selectedObject = null;
+    _furnitureId = 0;
 
     double ppf = 10.0;
-    double w = widthFeet * ppf;
-    double h = heightFeet * ppf;
+    double w = widthFt * ppf;
+    double h = heightFt * ppf;
     Offset o = const Offset(50, 50);
 
-    // Boundary
     walls.add(WallModel(start: o, end: o + Offset(w, 0)));
     walls.add(WallModel(start: o + Offset(w, 0), end: o + Offset(w, h)));
     walls.add(WallModel(start: o + Offset(w, h), end: o + Offset(0, h)));
     walls.add(WallModel(start: o + Offset(0, h), end: o));
 
-    _autoGenerateLayout(widthFeet, heightFeet, o, ppf);
+    _autoGenerateLayout(widthFt, heightFt, o, ppf);
     notifyListeners();
   }
+
+  double get canvasWidth => max(500, plotWidthFt * 10 + 100);
+  double get canvasHeight => max(500, plotHeightFt * 10 + 100);
 
   void _autoGenerateLayout(double wFt, double hFt, Offset o, double ppf) {
     if (wFt < 15 || hFt < 15) return;
 
     double w = wFt * ppf;
     double h = hFt * ppf;
-
-    // Determine layout type
     double area = wFt * hFt;
-    int numRooms;
-    if (area <= 600) numRooms = 1;       // 1BHK
-    else if (area <= 1000) numRooms = 2; // 2BHK
-    else numRooms = 3;                    // 3BHK
-
+    int numRooms = area <= 600 ? 1 : area <= 1000 ? 2 : 3;
     double margin = 10 * ppf;
-    double usableW = w - 2 * margin;
-    double usableH = h - 2 * margin;
+    double uW = w - 2 * margin;
+    double uH = h - 2 * margin;
 
-    Random rng = Random(wFt.toInt() * 1000 + hFt.toInt());
-
-    if (numRooms == 1) {
-      _add1BHK(o + Offset(margin, margin), usableW, usableH, rng);
-    } else if (numRooms == 2) {
-      _add2BHK(o + Offset(margin, margin), usableW, usableH, rng);
-    } else {
-      _add3BHK(o + Offset(margin, margin), usableW, usableH, rng);
-    }
+    if (numRooms == 1) _add1BHK(o + Offset(margin, margin), uW, uH);
+    else if (numRooms == 2) _add2BHK(o + Offset(margin, margin), uW, uH);
+    else _add3BHK(o + Offset(margin, margin), uW, uH);
   }
 
-  void _add1BHK(Offset o, double w, double h, Random rng) {
-    double wallT = 12;
-    // Living+Bedroom - 50% area
-    double livingW = w * 0.55;
-    double livingH = h;
-    _roomWalls(o, Offset(livingW, livingH), wallT, const Color(0xFFE8D5B7), 'Living Room');
-    // Kitchen
-    double kitW = w - livingW;
-    double kitH = h * 0.5;
-    _roomWalls(o + Offset(livingW, 0), Offset(kitW, kitH), wallT, const Color(0xFFD4E8D0), 'Kitchen');
-    // Bathroom
-    double bathH = h - kitH;
-    _roomWalls(o + Offset(livingW, kitH), Offset(kitW, bathH), wallT, const Color(0xFFC5DFF0), 'Bathroom');
-
-    _placeFurniture('Sofa', o + Offset(livingW * 0.25, livingH * 0.3));
-    _placeFurniture('Table', o + Offset(livingW * 0.5, livingH * 0.6));
-    _placeFurniture('Bed', o + Offset(livingW * 0.3, livingH * 0.8));
-    _placeFurniture('Chair', o + Offset(livingW * 0.7, livingH * 0.5));
+  void _add1BHK(Offset o, double w, double h) {
+    double t = 12;
+    double lw = w * 0.55;
+    _roomWalls(o, Offset(lw, h), t, const Color(0xFFE8D5B7), 'Living');
+    double kw = w - lw;
+    _roomWalls(o + Offset(lw, 0), Offset(kw, h * 0.5), t, const Color(0xFFD4E8D0), 'Kitchen');
+    _roomWalls(o + Offset(lw, h * 0.5), Offset(kw, h * 0.5), t, const Color(0xFFC5DFF0), 'Bath');
+    _placeFurniture('Sofa', o + Offset(lw * 0.3, h * 0.25));
+    _placeFurniture('Table', o + Offset(lw * 0.5, h * 0.55));
+    _placeFurniture('Bed', o + Offset(lw * 0.4, h * 0.8));
   }
 
-  void _add2BHK(Offset o, double w, double h, Random rng) {
-    double wallT = 12;
-    double leftW = w * 0.5;
-
-    // Left column: Living Room (top) + Kitchen (bottom)
-    double livingH = h * 0.6;
-    _roomWalls(o, Offset(leftW, livingH), wallT, const Color(0xFFE8D5B7), 'Living Room');
-    double kitH = h - livingH;
-    _roomWalls(o + Offset(0, livingH), Offset(leftW, kitH), wallT, const Color(0xFFD4E8D0), 'Kitchen');
-
-    // Right column: Bedroom1 (top) + Bedroom2 (bottom)
-    double br1H = h * 0.5;
-    double rightW = w - leftW;
-    _roomWalls(o + Offset(leftW, 0), Offset(rightW, br1H), wallT, const Color(0xFFFFE0B2), 'Bedroom 1');
-    double br2H = h - br1H;
-    _roomWalls(o + Offset(leftW, br1H), Offset(rightW, br2H), wallT, const Color(0xFFE1BEE7), 'Bedroom 2');
-
-    // Bathroom (small, inside)
-    double bathW = rightW * 0.4;
-    double bathH2 = br2H * 0.5;
-    _roomWalls(o + Offset(leftW + rightW - bathW, br1H + br2H - bathH2), Offset(bathW, bathH2), wallT, const Color(0xFFC5DFF0), 'Bathroom');
-
-    _placeFurniture('Sofa', o + Offset(leftW * 0.3, livingH * 0.3));
-    _placeFurniture('Table', o + Offset(leftW * 0.5, livingH * 0.5));
-    _placeFurniture('Bed', o + Offset(leftW + rightW * 0.4, br1H * 0.4));
-    _placeFurniture('Bed', o + Offset(leftW + rightW * 0.4, br1H + br2H * 0.4));
-    _placeFurniture('Chair', o + Offset(leftW * 0.7, livingH * 0.7));
-    _placeFurniture('Wardrobe', o + Offset(leftW + rightW * 0.2, br1H * 0.2));
+  void _add2BHK(Offset o, double w, double h) {
+    double t = 12;
+    double lw = w * 0.5;
+    double lh = h * 0.6;
+    _roomWalls(o, Offset(lw, lh), t, const Color(0xFFE8D5B7), 'Living');
+    _roomWalls(o + Offset(0, lh), Offset(lw, h - lh), t, const Color(0xFFD4E8D0), 'Kitchen');
+    double rw = w - lw;
+    double rh = h * 0.5;
+    _roomWalls(o + Offset(lw, 0), Offset(rw, rh), t, const Color(0xFFFFE0B2), 'Bed 1');
+    _roomWalls(o + Offset(lw, rh), Offset(rw, h - rh), t, const Color(0xFFE1BEE7), 'Bed 2');
+    _roomWalls(o + Offset(lw + rw - rw * 0.4, rh + (h - rh) * 0.45), Offset(rw * 0.4, (h - rh) * 0.55), t, const Color(0xFFC5DFF0), 'Bath');
+    _placeFurniture('Sofa', o + Offset(lw * 0.3, lh * 0.3));
+    _placeFurniture('Table', o + Offset(lw * 0.5, lh * 0.5));
+    _placeFurniture('Bed', o + Offset(lw + rw * 0.4, rh * 0.4));
+    _placeFurniture('Bed', o + Offset(lw + rw * 0.4, rh + (h - rh) * 0.4));
   }
 
-  void _add3BHK(Offset o, double w, double h, Random rng) {
-    double wallT = 12;
-    // Top row: Living Room (big, left) + Bedroom 1 (right)
-    double topH = h * 0.55;
-    double leftW = w * 0.55;
-
-    _roomWalls(o, Offset(leftW, topH), wallT, const Color(0xFFE8D5B7), 'Living Room');
-    double br1W = w - leftW;
-    _roomWalls(o + Offset(leftW, 0), Offset(br1W, topH), wallT, const Color(0xFFFFE0B2), 'Bedroom 1');
-
-    // Bottom row: Kitchen (left), Bedroom 2 (mid), Bathroom (right)
-    double botH = h - topH;
-    double kitW = leftW * 0.5;
-    _roomWalls(o + Offset(0, topH), Offset(kitW, botH), wallT, const Color(0xFFD4E8D0), 'Kitchen');
-    double br2W = leftW - kitW;
-    _roomWalls(o + Offset(kitW, topH), Offset(br2W, botH), wallT, const Color(0xFFE1BEE7), 'Bedroom 2');
-    double bathW = br1W;
-    double bathH2 = botH * 0.55;
-    _roomWalls(o + Offset(leftW + br1W - bathW, topH + botH - bathH2), Offset(bathW, bathH2), wallT, const Color(0xFFC5DFF0), 'Bathroom');
-
-    _placeFurniture('Sofa', o + Offset(leftW * 0.3, topH * 0.3));
-    _placeFurniture('Table', o + Offset(leftW * 0.5, topH * 0.5));
-    _placeFurniture('Bed', o + Offset(leftW + br1W * 0.4, topH * 0.4));
-    _placeFurniture('Bed', o + Offset(kitW + br2W * 0.4, topH + botH * 0.4));
-    _placeFurniture('Chair', o + Offset(leftW * 0.7, topH * 0.7));
-    _placeFurniture('Wardrobe', o + Offset(leftW + br1W * 0.15, topH * 0.2));
-    _placeFurniture('Desk', o + Offset(kitW + br2W * 0.3, topH + botH * 0.5));
+  void _add3BHK(Offset o, double w, double h) {
+    double t = 12;
+    double th = h * 0.55;
+    double lw = w * 0.55;
+    _roomWalls(o, Offset(lw, th), t, const Color(0xFFE8D5B7), 'Living');
+    double rw = w - lw;
+    _roomWalls(o + Offset(lw, 0), Offset(rw, th), t, const Color(0xFFFFE0B2), 'Bed 1');
+    double bh = h - th;
+    double kw = lw * 0.5;
+    _roomWalls(o + Offset(0, th), Offset(kw, bh), t, const Color(0xFFD4E8D0), 'Kitchen');
+    double bw = lw - kw;
+    _roomWalls(o + Offset(kw, th), Offset(bw, bh), t, const Color(0xFFE1BEE7), 'Bed 2');
+    double btw = rw;
+    _roomWalls(o + Offset(lw + rw - btw, th + bh * 0.45), Offset(btw, bh * 0.55), t, const Color(0xFFC5DFF0), 'Bath');
+    _placeFurniture('Sofa', o + Offset(lw * 0.3, th * 0.3));
+    _placeFurniture('Table', o + Offset(lw * 0.5, th * 0.5));
+    _placeFurniture('Bed', o + Offset(lw + rw * 0.4, th * 0.4));
+    _placeFurniture('Bed', o + Offset(kw + bw * 0.4, th + bh * 0.4));
+    _placeFurniture('Desk', o + Offset(kw + bw * 0.3, th + bh * 0.6));
   }
 
   void _roomWalls(Offset pos, Offset size, double t, Color color, String label) {
     double x = pos.dx, y = pos.dy, w = size.dx, h = size.dy;
-    Color wallColor = const Color(0xFF2D3436);
-
-    // Skip walls that overlap with boundary or existing walls
-    walls.add(WallModel(start: Offset(x, y), end: Offset(x + w, y), thickness: t, color: wallColor));
-    walls.add(WallModel(start: Offset(x + w, y), end: Offset(x + w, y + h), thickness: t, color: wallColor));
-    walls.add(WallModel(start: Offset(x + w, y + h), end: Offset(x, y + h), thickness: t, color: wallColor));
-    walls.add(WallModel(start: Offset(x, y + h), end: Offset(x, y), thickness: t, color: wallColor));
-
+    Color wc = const Color(0xFF2D3436);
+    walls.add(WallModel(start: Offset(x, y), end: Offset(x + w, y), thickness: t, color: wc));
+    walls.add(WallModel(start: Offset(x + w, y), end: Offset(x + w, y + h), thickness: t, color: wc));
+    walls.add(WallModel(start: Offset(x + w, y + h), end: Offset(x, y + h), thickness: t, color: wc));
+    walls.add(WallModel(start: Offset(x, y + h), end: Offset(x, y), thickness: t, color: wc));
     rooms.add(RoomData(rect: Rect.fromLTWH(x, y, w, h), color: color, label: label));
   }
 
-  int _furnitureId = 0;
   void _placeFurniture(String type, Offset pos) {
     _furnitureId++;
+    Color c;
+    double w, h;
+    switch (type) {
+      case 'Sofa': c = const Color(0xFF78909C); w = 90; h = 45; break;
+      case 'Bed': c = const Color(0xFF64B5F6); w = 70; h = 85; break;
+      case 'Table': c = const Color(0xFFA1887F); w = 60; h = 40; break;
+      case 'Chair': c = const Color(0xFFFFB74D); w = 30; h = 30; break;
+      case 'Wardrobe': c = const Color(0xFF8D6E63); w = 50; h = 65; break;
+      case 'Desk': c = const Color(0xFF7986CB); w = 55; h = 30; break;
+      default: c = const Color(0xFFFF9800); w = 50; h = 50;
+    }
     furniture.add(FurnitureModel(
-      id: 'auto_$_furnitureId',
-      type: type, position: pos,
+      id: 'auto_$_furnitureId', type: type, position: pos,
+      width: w, height: h, color: c,
     ));
   }
 
@@ -239,12 +218,12 @@ class CanvasProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addFurniture(String type, {Offset? position}) {
+  void addFurniture(String type, {Offset? position, String styleName = '', double width = 60, double height = 60, Color color = const Color(0xFFFF9800)}) {
     _saveSnapshot();
     furniture.add(FurnitureModel(
       id: DateTime.now().microsecondsSinceEpoch.toString(),
-      type: type,
-      position: position ?? const Offset(150, 150),
+      type: type, position: position ?? const Offset(150, 150),
+      styleName: styleName, width: width, height: height, color: color,
     ));
     notifyListeners();
   }
@@ -259,25 +238,62 @@ class CanvasProvider extends ChangeNotifier {
 
   Offset _snap(Offset point) {
     if (!snapToGrid) return point;
-    return Offset(
+
+    // Snap to existing wall endpoints for seamless connection
+    Offset snapped = Offset(
       (point.dx / gridSize).round() * gridSize,
       (point.dy / gridSize).round() * gridSize,
     );
+
+    // Check nearby wall endpoints
+    for (var w in walls) {
+      if ((w.start - point).distance < 15) return w.start;
+      if ((w.end - point).distance < 15) return w.end;
+    }
+    return snapped;
   }
 
   void selectObject(Offset localPosition) {
     selectedObject = null;
+    selectedRoomIndex = null;
+
+    // Check furniture
     for (var f in furniture.reversed) {
       final rect = Rect.fromCenter(center: f.position, width: f.width + 10, height: f.height + 10);
       if (rect.contains(localPosition)) { selectedObject = f; break; }
     }
+    // Check walls
     if (selectedObject == null) {
       for (var w in walls.reversed) {
         final d = _distanceToSegment(localPosition, w.start, w.end);
         if (d.distance < w.thickness + 10) { selectedObject = w; break; }
       }
     }
+    // Check rooms
+    if (selectedObject == null) {
+      for (int i = rooms.length - 1; i >= 0; i--) {
+        if (rooms[i].rect.contains(localPosition)) {
+          selectedRoomIndex = i;
+          break;
+        }
+      }
+    }
     notifyListeners();
+  }
+
+  String selectedDoorDesign = 'Wooden';
+  Color selectedDoorColor = const Color(0xFF8B5E3C);
+  String selectedWindowDesign = 'Casement';
+  Color selectedWindowColor = const Color(0xFF81D4FA);
+  double selectedDoorWidth = 36.0;
+  double selectedWindowWidth = 40.0;
+
+  void setDoorDesign(String name, Color color, double width) {
+    selectedDoorDesign = name; selectedDoorColor = color; selectedDoorWidth = width;
+  }
+
+  void setWindowDesign(String name, Color color, double width) {
+    selectedWindowDesign = name; selectedWindowColor = color; selectedWindowWidth = width;
   }
 
   void addOpening(OpeningType type, Offset position) {
@@ -285,11 +301,23 @@ class CanvasProvider extends ChangeNotifier {
     double minDist = double.infinity, tVal = 0.5;
     for (var wall in walls) {
       final d = _distanceToSegment(position, wall.start, wall.end);
-      if (d.distance < minDist && d.distance < 20) { minDist = d.distance; nearestWall = wall; tVal = d.t; }
+      if (d.distance < minDist && d.distance < 25) { minDist = d.distance; nearestWall = wall; tVal = d.t; }
     }
     if (nearestWall != null) {
       _saveSnapshot();
-      nearestWall.openings = List.from(nearestWall.openings)..add(OpeningModel(type: type, position: tVal));
+      if (type == OpeningType.door) {
+        nearestWall.openings = List.from(nearestWall.openings)..add(OpeningModel(
+          type: type, position: tVal,
+          designName: selectedDoorDesign, designColor: selectedDoorColor,
+          width: selectedDoorWidth,
+        ));
+      } else {
+        nearestWall.openings = List.from(nearestWall.openings)..add(OpeningModel(
+          type: type, position: tVal,
+          designName: selectedWindowDesign, designColor: selectedWindowColor,
+          width: selectedWindowWidth,
+        ));
+      }
       notifyListeners();
     }
   }

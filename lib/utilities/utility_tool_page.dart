@@ -101,6 +101,22 @@ class _UtilityToolPageState extends State<UtilityToolPage> {
         return const BarcodeGeneratorToolBody();
       case 'password-generator':
         return const PasswordGeneratorToolBody();
+      case 'password-strength':
+        return const PasswordStrengthCheckerToolBody();
+      case 'hash-generator':
+        return const HashGeneratorToolBody();
+      case 'base64-encode-decode':
+        return const Base64ToolBody();
+      case 'image-watermark':
+        return const ImageWatermarkToolBody();
+      case 'meme-maker':
+        return const MemeMakerToolBody();
+      case 'image-to-pdf':
+        return const ImageToPdfToolBody();
+      case 'pdf-watermark':
+        return const PdfWatermarkToolBody();
+      case 'pdf-password-protect':
+        return const PdfPasswordToolBody();
       default:
         return const Center(
           child: Text('Unknown tool'),

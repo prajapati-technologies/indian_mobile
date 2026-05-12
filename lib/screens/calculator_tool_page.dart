@@ -23,6 +23,13 @@ const List<({String key, String title, String subtitle, IconData icon, Color col
   (key: 'love-calc', title: 'Love Calculator', subtitle: 'Fun love compatibility tool', icon: Icons.favorite_outline, color: Color(0xFFE91E63)),
   (key: 'compat-calc', title: 'Compatibility', subtitle: 'Check partner compatibility', icon: Icons.group_outlined, color: Color(0xFF009688)),
   (key: 'horo-calc', title: 'Horoscope Calculator', subtitle: 'Check your daily horoscope', icon: Icons.stars_outlined, color: Color(0xFF673AB7)),
+  (key: 'gst-calc', title: 'GST Calculator', subtitle: 'Calculate GST amounts & totals', icon: Icons.receipt_outlined, color: Color(0xFF7B1FA2)),
+  (key: 'fdrd-calc', title: 'FD/RD Calculator', subtitle: 'Calculate fixed/recurring deposit returns', icon: Icons.account_balance_outlined, color: Color(0xFF1565C0)),
+  (key: 'percent-calc', title: 'Percentage Calculator', subtitle: 'Calculate percentages easily', icon: Icons.percent_outlined, color: Color(0xFF00897B)),
+  (key: 'fuel-calc', title: 'Fuel Cost Calculator', subtitle: 'Calculate trip fuel cost', icon: Icons.local_gas_station_outlined, color: Color(0xFFE65100)),
+  (key: 'electricity-calc', title: 'Electricity Bill Calculator', subtitle: 'Calculate your electricity bill', icon: Icons.bolt_outlined, color: Color(0xFFF9A825)),
+  (key: 'material-calc', title: 'Material Estimator', subtitle: 'Estimate construction materials', icon: Icons.construction_outlined, color: Color(0xFF37474F)),
+  (key: 'currency-calc', title: 'Currency Converter', subtitle: 'Convert currencies with live rates', icon: Icons.monetization_on_outlined, color: Color(0xFF2E7D32)),
 ];
 
 class CalculatorToolPage extends StatefulWidget {
@@ -130,6 +137,20 @@ class _CalculatorToolPageState extends State<CalculatorToolPage> {
         return const _CompatCalc();
       case 'horo-calc':
         return const _HoroCalc();
+      case 'gst-calc':
+        return const _GstCalc();
+      case 'fdrd-calc':
+        return const _FdRdCalc();
+      case 'percent-calc':
+        return const _PercentCalc();
+      case 'fuel-calc':
+        return const _FuelCalc();
+      case 'electricity-calc':
+        return const _ElectricityCalc();
+      case 'material-calc':
+        return const _MaterialCalc();
+      case 'currency-calc':
+        return const _CurrencyCalc();
       default:
         return const Text('Unknown calculator');
     }
@@ -652,6 +673,37 @@ class _CalorieCalcState extends State<_CalorieCalc> {
   }
 }
 
+Widget _dropdownField({
+  required String label,
+  required String? value,
+  required List<DropdownMenuItem<String>> items,
+  required ValueChanged<String?> onChanged,
+}) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textMuted, fontWeight: FontWeight.w500)),
+        const SizedBox(height: 4),
+        DropdownButtonFormField<String>(
+          value: value,
+          isExpanded: true,
+          decoration: InputDecoration(
+            isDense: true,
+            filled: true,
+            fillColor: AppColors.cardMutedBg,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.borderLight)),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.borderLight)),
+          ),
+          items: items,
+          onChanged: onChanged,
+        ),
+      ],
+    ),
+  );
+}
+
 class _UnitCalc extends StatefulWidget {
   const _UnitCalc();
 
@@ -660,32 +712,130 @@ class _UnitCalc extends StatefulWidget {
 }
 
 class _UnitCalcState extends State<_UnitCalc> {
-  final _km = TextEditingController(text: '10');
-  String _out = 'Miles: -';
+  static const _categories = ['Length', 'Weight', 'Area', 'Volume', 'Speed', 'Temperature'];
+
+  static const Map<String, List<String>> _categoryUnits = {
+    'Length': ['mm', 'cm', 'm', 'km', 'inches', 'feet', 'yards', 'miles'],
+    'Weight': ['mg', 'g', 'kg', 'tons', 'lbs', 'ounces'],
+    'Area': ['sq mm', 'sq cm', 'sq m', 'sq ft', 'sq yd', 'acres', 'hectares'],
+    'Volume': ['mL', 'L', 'gallons', 'cubic ft', 'cubic m'],
+    'Speed': ['m/s', 'km/h', 'ft/s', 'mph', 'knots'],
+    'Temperature': ['\u00b0C', '\u00b0F', 'K'],
+  };
+
+  static const Map<String, double> _toBase = {
+    'mm': 0.001, 'cm': 0.01, 'm': 1.0, 'km': 1000.0,
+    'inches': 0.0254, 'feet': 0.3048, 'yards': 0.9144, 'miles': 1609.344,
+    'mg': 0.001, 'g': 1.0, 'kg': 1000.0, 'tons': 1000000.0, 'lbs': 453.592, 'ounces': 28.3495,
+    'sq mm': 0.000001, 'sq cm': 0.0001, 'sq m': 1.0, 'sq ft': 0.092903, 'sq yd': 0.836127,
+    'acres': 4046.86, 'hectares': 10000.0,
+    'mL': 0.001, 'L': 1.0, 'gallons': 3.78541, 'cubic ft': 28.3168, 'cubic m': 1000.0,
+    'm/s': 1.0, 'km/h': 0.277778, 'ft/s': 0.3048, 'mph': 0.44704, 'knots': 0.514444,
+  };
+
+  String _category = 'Length';
+  String _fromUnit = 'm';
+  String _toUnit = 'km';
+  final _input = TextEditingController(text: '100');
+  String _result = '';
 
   @override
   void dispose() {
-    _km.dispose();
+    _input.dispose();
     super.dispose();
   }
 
-  void _go() {
-    final km = double.tryParse(_km.text) ?? 0;
-    final miles = km * 0.621371;
+  void _convert() {
+    final value = double.tryParse(_input.text) ?? 0;
+
+    String formattedResult;
+    if (_category == 'Temperature') {
+      double celsius;
+      switch (_fromUnit) {
+        case '\u00b0C':
+          celsius = value;
+          break;
+        case '\u00b0F':
+          celsius = (value - 32) * 5 / 9;
+          break;
+        case 'K':
+          celsius = value - 273.15;
+          break;
+        default:
+          celsius = 0;
+      }
+      double result;
+      switch (_toUnit) {
+        case '\u00b0C':
+          result = celsius;
+          break;
+        case '\u00b0F':
+          result = celsius * 9 / 5 + 32;
+          break;
+        case 'K':
+          result = celsius + 273.15;
+          break;
+        default:
+          result = 0;
+      }
+      formattedResult = '$value $_fromUnit = ${result.toStringAsFixed(2)} $_toUnit';
+    } else {
+      final baseValue = value * _toBase[_fromUnit]!;
+      final result = baseValue / _toBase[_toUnit]!;
+      formattedResult = '$value $_fromUnit = ${result.toStringAsFixed(4)} $_toUnit';
+    }
+
+    setState(() => _result = formattedResult);
+  }
+
+  void _onCategoryChanged(String? category) {
+    if (category == null || category == _category) return;
+    final units = _categoryUnits[category]!;
     setState(() {
-      _out = 'Miles: ${miles.toStringAsFixed(2)}\n'
-          'Meters: ${(km * 1000).toStringAsFixed(0)}\n'
-          'Feet: ${(km * 3280.84).toStringAsFixed(0)}';
+      _category = category;
+      _fromUnit = units[0];
+      _toUnit = units.length > 1 ? units[1] : units[0];
+      _result = '';
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final units = _categoryUnits[_category]!;
     return _card(children: [
-      _labelField('Kilometers', _km),
-      FilledButton(onPressed: _go, child: const Text('Convert')),
-      const SizedBox(height: 12),
-      Text(_out),
+      _dropdownField(
+        label: 'Category',
+        value: _category,
+        items: _categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+        onChanged: _onCategoryChanged,
+      ),
+      Row(
+        children: [
+          Expanded(
+            child: _dropdownField(
+              label: 'From',
+              value: _fromUnit,
+              items: units.map((u) => DropdownMenuItem(value: u, child: Text(u))).toList(),
+              onChanged: (v) => setState(() => _fromUnit = v!),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _dropdownField(
+              label: 'To',
+              value: _toUnit,
+              items: units.map((u) => DropdownMenuItem(value: u, child: Text(u))).toList(),
+              onChanged: (v) => setState(() => _toUnit = v!),
+            ),
+          ),
+        ],
+      ),
+      _labelField('Value', _input),
+      FilledButton(onPressed: _convert, child: const Text('Convert')),
+      if (_result.isNotEmpty) ...[
+        const SizedBox(height: 12),
+        Text(_result, style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.brandNavy)),
+      ],
     ]);
   }
 }
@@ -1021,6 +1171,592 @@ class _HoroCalcState extends State<_HoroCalc> {
       FilledButton(onPressed: _go, child: const Text('Check')),
       const SizedBox(height: 12),
       Text(_out),
+    ]);
+  }
+}
+
+class _GstCalc extends StatefulWidget {
+  const _GstCalc();
+
+  @override
+  State<_GstCalc> createState() => _GstCalcState();
+}
+
+class _GstCalcState extends State<_GstCalc> {
+  final _amount = TextEditingController(text: '10000');
+  int _rate = 18;
+  bool _exclusive = true;
+  double _baseAmount = 0, _cgst = 0, _sgst = 0, _total = 0;
+  bool _calculated = false;
+
+  static const _rates = [5, 12, 18, 28];
+
+  @override
+  void dispose() {
+    _amount.dispose();
+    super.dispose();
+  }
+
+  void _calc() {
+    final amount = double.tryParse(_amount.text) ?? 0;
+    double gst, base;
+    if (_exclusive) {
+      gst = amount * _rate / 100;
+      base = amount;
+    } else {
+      gst = amount * _rate / (100 + _rate);
+      base = amount - gst;
+    }
+    setState(() {
+      _baseAmount = base;
+      _cgst = gst / 2;
+      _sgst = gst / 2;
+      _total = _exclusive ? amount + gst : amount;
+      _calculated = true;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _card(children: [
+      _labelField('Amount (Rs)', _amount),
+      _dropdownField(
+        label: 'GST Rate',
+        value: _rate.toString(),
+        items: _rates.map((r) => DropdownMenuItem(value: r.toString(), child: Text('$r%'))).toList(),
+        onChanged: (v) => setState(() => _rate = int.parse(v!)),
+      ),
+      const SizedBox(height: 8),
+      Row(
+        children: [
+          ChoiceChip(
+            label: const Text('Exclusive'),
+            selected: _exclusive,
+            onSelected: (_) => setState(() => _exclusive = true),
+          ),
+          const SizedBox(width: 8),
+          ChoiceChip(
+            label: const Text('Inclusive'),
+            selected: !_exclusive,
+            onSelected: (_) => setState(() => _exclusive = false),
+          ),
+        ],
+      ),
+      const SizedBox(height: 8),
+      FilledButton(onPressed: _calc, child: const Text('Calculate')),
+      if (_calculated) ...[
+        const SizedBox(height: 12),
+        const Divider(height: 16),
+        Text('Taxable Value: ${_fmtInr(_baseAmount.round())}', style: const TextStyle(fontWeight: FontWeight.w600)),
+        const SizedBox(height: 4),
+        Text('CGST @ ${_rate ~/ 2}%: ${_fmtInr(_cgst.round())}'),
+        Text('SGST @ ${_rate ~/ 2}%: ${_fmtInr(_sgst.round())}'),
+        const Divider(height: 16),
+        Text('Total: ${_fmtInr(_total.round())}', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.brandNavy)),
+      ],
+    ]);
+  }
+}
+
+class _FdRdCalc extends StatefulWidget {
+  const _FdRdCalc();
+
+  @override
+  State<_FdRdCalc> createState() => _FdRdCalcState();
+}
+
+class _FdRdCalcState extends State<_FdRdCalc> {
+  bool _isFd = true;
+  final _principal = TextEditingController(text: '100000');
+  final _monthly = TextEditingController(text: '5000');
+  final _rate = TextEditingController(text: '7');
+  final _tenure = TextEditingController(text: '5');
+  double _maturity = 0, _totalInvestment = 0, _interest = 0;
+  bool _calculated = false;
+
+  @override
+  void dispose() {
+    _principal.dispose();
+    _monthly.dispose();
+    _rate.dispose();
+    _tenure.dispose();
+    super.dispose();
+  }
+
+  void _calc() {
+    final r = (double.tryParse(_rate.text) ?? 0) / 100;
+    final t = double.tryParse(_tenure.text) ?? 0;
+    const n = 4;
+
+    if (_isFd) {
+      final p = double.tryParse(_principal.text) ?? 0;
+      if (p <= 0 || t <= 0) return;
+      _maturity = r == 0 ? p : p * math.pow(1 + r / n, n * t).toDouble();
+      _totalInvestment = p;
+    } else {
+      final m = double.tryParse(_monthly.text) ?? 0;
+      if (m <= 0 || t <= 0) return;
+      if (r == 0) {
+        _maturity = m * 12 * t;
+      } else {
+        final nt = n * t;
+        _maturity = m * ((math.pow(1 + r / n, nt).toDouble() - 1) / (r / n)) * (1 + r / n);
+      }
+      _totalInvestment = m * 12 * t;
+    }
+    _interest = _maturity - _totalInvestment;
+    setState(() => _calculated = true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _card(children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ChoiceChip(
+            label: const Text('FD'),
+            selected: _isFd,
+            onSelected: (_) => setState(() => _isFd = true),
+          ),
+          const SizedBox(width: 8),
+          ChoiceChip(
+            label: const Text('RD'),
+            selected: !_isFd,
+            onSelected: (_) => setState(() => _isFd = false),
+          ),
+        ],
+      ),
+      const SizedBox(height: 10),
+      if (_isFd) _labelField('Principal Amount (Rs)', _principal),
+      if (!_isFd) _labelField('Monthly Installment (Rs)', _monthly),
+      Row(
+        children: [
+          Expanded(child: _labelField('Rate (% p.a.)', _rate)),
+          const SizedBox(width: 10),
+          Expanded(child: _labelField('Tenure (Years)', _tenure)),
+        ],
+      ),
+      FilledButton(onPressed: _calc, child: const Text('Calculate')),
+      if (_calculated) ...[
+        const SizedBox(height: 12),
+        const Divider(height: 16),
+        Text('Maturity Amount: ${_fmtInr(_maturity.round())}', style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.brandNavy)),
+        const SizedBox(height: 4),
+        Text('Total Investment: ${_fmtInr(_totalInvestment.round())}'),
+        Text('Interest Earned: ${_fmtInr(_interest.round())}', style: const TextStyle(color: Color(0xFF2E7D32))),
+      ],
+    ]);
+  }
+}
+
+class _PercentCalc extends StatefulWidget {
+  const _PercentCalc();
+
+  @override
+  State<_PercentCalc> createState() => _PercentCalcState();
+}
+
+class _PercentCalcState extends State<_PercentCalc> {
+  static const _modes = [
+    'X is what % of Y',
+    'X% of Y',
+    '% change from X to Y',
+  ];
+
+  String _mode = _modes[0];
+  final _valA = TextEditingController(text: '25');
+  final _valB = TextEditingController(text: '200');
+  String _result = '';
+
+  @override
+  void dispose() {
+    _valA.dispose();
+    _valB.dispose();
+    super.dispose();
+  }
+
+  void _calc() {
+    final a = double.tryParse(_valA.text) ?? 0;
+    final b = double.tryParse(_valB.text) ?? 0;
+    if (b == 0) {
+      setState(() => _result = 'Please enter valid numbers (Y cannot be zero)');
+      return;
+    }
+
+    double result;
+    String formula;
+    switch (_mode) {
+      case 'X is what % of Y':
+        result = (a / b) * 100;
+        formula = '$a \u00f7 $b \u00d7 100 = ${result.toStringAsFixed(2)}%';
+        break;
+      case 'X% of Y':
+        result = (a / 100) * b;
+        formula = '$a% of $b = $a \u00f7 100 \u00d7 $b = ${result.toStringAsFixed(2)}';
+        break;
+      case '% change from X to Y':
+        result = ((b - a) / a) * 100;
+        final dir = result >= 0 ? 'increase' : 'decrease';
+        formula = '($b - $a) \u00f7 $a \u00d7 100 = ${result.toStringAsFixed(2)}% $dir';
+        break;
+      default:
+        result = 0;
+        formula = '';
+    }
+
+    setState(() => _result = formula);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    String labelA, labelB;
+    switch (_mode) {
+      case 'X is what % of Y':
+        labelA = 'Value (X)';
+        labelB = 'Total (Y)';
+        break;
+      case 'X% of Y':
+        labelA = 'Percentage (X)';
+        labelB = 'Value (Y)';
+        break;
+      case '% change from X to Y':
+        labelA = 'Original (X)';
+        labelB = 'New (Y)';
+        break;
+      default:
+        labelA = 'Value A';
+        labelB = 'Value B';
+    }
+
+    return _card(children: [
+      _dropdownField(
+        label: 'Mode',
+        value: _mode,
+        items: _modes.map((m) => DropdownMenuItem(value: m, child: Text(m, style: const TextStyle(fontSize: 13)))).toList(),
+        onChanged: (v) {
+          setState(() {
+            _mode = v!;
+            _result = '';
+          });
+        },
+      ),
+      const SizedBox(height: 4),
+      _labelField(labelA, _valA),
+      _labelField(labelB, _valB),
+      FilledButton(onPressed: _calc, child: const Text('Calculate')),
+      if (_result.isNotEmpty) ...[
+        const SizedBox(height: 12),
+        Text(_result, style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.brandNavy)),
+      ],
+    ]);
+  }
+}
+
+class _FuelCalc extends StatefulWidget {
+  const _FuelCalc();
+
+  @override
+  State<_FuelCalc> createState() => _FuelCalcState();
+}
+
+class _FuelCalcState extends State<_FuelCalc> {
+  final _distance = TextEditingController(text: '100');
+  final _mileage = TextEditingController(text: '18');
+  final _price = TextEditingController(text: '105');
+  bool _calculated = false;
+  double _fuelNeeded = 0, _totalCost = 0;
+
+  @override
+  void dispose() {
+    _distance.dispose();
+    _mileage.dispose();
+    _price.dispose();
+    super.dispose();
+  }
+
+  void _calc() {
+    final dist = double.tryParse(_distance.text) ?? 0;
+    final mil = double.tryParse(_mileage.text) ?? 0;
+    final price = double.tryParse(_price.text) ?? 0;
+
+    if (dist <= 0 || mil <= 0) return;
+
+    setState(() {
+      _fuelNeeded = dist / mil;
+      _totalCost = _fuelNeeded * price;
+      _calculated = true;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _card(children: [
+      _labelField('Distance (km)', _distance),
+      Row(
+        children: [
+          Expanded(child: _labelField('Mileage (km/L)', _mileage)),
+          const SizedBox(width: 10),
+          Expanded(child: _labelField('Fuel Price (Rs/L)', _price)),
+        ],
+      ),
+      FilledButton(onPressed: _calc, child: const Text('Calculate')),
+      if (_calculated) ...[
+        const SizedBox(height: 12),
+        const Divider(height: 16),
+        Text('Fuel Needed: ${_fuelNeeded.toStringAsFixed(1)} L', style: const TextStyle(fontWeight: FontWeight.w600)),
+        const SizedBox(height: 4),
+        Text('Total Cost: ${_fmtInr(_totalCost.round())}', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.brandNavy)),
+      ],
+    ]);
+  }
+}
+
+class _ElectricityCalc extends StatefulWidget {
+  const _ElectricityCalc();
+
+  @override
+  State<_ElectricityCalc> createState() => _ElectricityCalcState();
+}
+
+class _ElectricityCalcState extends State<_ElectricityCalc> {
+  final _units = TextEditingController(text: '300');
+  final _rate = TextEditingController(text: '7');
+  final _fixed = TextEditingController(text: '100');
+  bool _calculated = false;
+  double _energyCharge = 0, _subtotal = 0, _gst = 0, _total = 0;
+
+  @override
+  void dispose() {
+    _units.dispose();
+    _rate.dispose();
+    _fixed.dispose();
+    super.dispose();
+  }
+
+  void _calc() {
+    final u = double.tryParse(_units.text) ?? 0;
+    final r = double.tryParse(_rate.text) ?? 0;
+    final f = double.tryParse(_fixed.text) ?? 0;
+
+    setState(() {
+      _energyCharge = u * r;
+      _subtotal = _energyCharge + f;
+      _gst = _subtotal * 0.18;
+      _total = _subtotal + _gst;
+      _calculated = true;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _card(children: [
+      _labelField('Units Consumed', _units),
+      Row(
+        children: [
+          Expanded(child: _labelField('Rate per Unit (Rs)', _rate)),
+          const SizedBox(width: 10),
+          Expanded(child: _labelField('Fixed Charge (Rs)', _fixed)),
+        ],
+      ),
+      FilledButton(onPressed: _calc, child: const Text('Calculate')),
+      if (_calculated) ...[
+        const SizedBox(height: 12),
+        const Divider(height: 16),
+        Text('Energy Charge: ${_fmtInr(_energyCharge.round())}'),
+        Text('Fixed Charge: ${_fmtInr((double.tryParse(_fixed.text) ?? 0).round())}'),
+        const Divider(height: 12),
+        Text('Subtotal: ${_fmtInr(_subtotal.round())}', style: const TextStyle(fontWeight: FontWeight.w600)),
+        Text('GST @ 18%: ${_fmtInr(_gst.round())}'),
+        const Divider(height: 12),
+        Text('Total Bill: ${_fmtInr(_total.round())}', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.brandNavy)),
+      ],
+    ]);
+  }
+}
+
+class _MaterialCalc extends StatefulWidget {
+  const _MaterialCalc();
+
+  @override
+  State<_MaterialCalc> createState() => _MaterialCalcState();
+}
+
+class _MaterialCalcState extends State<_MaterialCalc> {
+  final _length = TextEditingController(text: '40');
+  final _width = TextEditingController(text: '30');
+  String _buildingType = 'Residential 1-floor';
+  bool _calculated = false;
+
+  static const _buildingTypes = ['Residential 1-floor', 'Residential 2-floor', 'Commercial'];
+  static const _multipliers = <String, double>{
+    'Residential 1-floor': 1.0,
+    'Residential 2-floor': 1.8,
+    'Commercial': 2.5,
+  };
+
+  final List<_MaterialRow> _materials = [];
+
+  @override
+  void dispose() {
+    _length.dispose();
+    _width.dispose();
+    super.dispose();
+  }
+
+  void _calc() {
+    final l = double.tryParse(_length.text) ?? 0;
+    final w = double.tryParse(_width.text) ?? 0;
+    if (l <= 0 || w <= 0) return;
+
+    final mult = _multipliers[_buildingType] ?? 1.0;
+    final area = l * w;
+
+    setState(() {
+      _materials.clear();
+      _materials.add(_MaterialRow(Icons.grid_on, 'Bricks (approx)', (area * 3.5 * mult).round().toString()));
+      _materials.add(_MaterialRow(Icons.inventory_2, 'Cement (bags)', '${(area * 0.5 * mult).toStringAsFixed(0)} bags'));
+      _materials.add(_MaterialRow(Icons.landscape, 'Sand (cu.ft)', (area * 2.5 * mult).toStringAsFixed(0)));
+      _materials.add(_MaterialRow(Icons.circle_outlined, 'Aggregate (cu.ft)', (area * 1.8 * mult).toStringAsFixed(0)));
+      _materials.add(_MaterialRow(Icons.construction_outlined, 'Steel (kg)', (area * 1.2 * mult).toStringAsFixed(0)));
+      _materials.add(_MaterialRow(Icons.brush, 'Paint (liters)', ((l + w) * 2 * 0.15 * mult).toStringAsFixed(1)));
+      _calculated = true;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _card(children: [
+      Row(
+        children: [
+          Expanded(child: _labelField('Length (ft)', _length)),
+          const SizedBox(width: 10),
+          Expanded(child: _labelField('Width (ft)', _width)),
+        ],
+      ),
+      _dropdownField(
+        label: 'Building Type',
+        value: _buildingType,
+        items: _buildingTypes.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+        onChanged: (v) => setState(() => _buildingType = v!),
+      ),
+      FilledButton(onPressed: _calc, child: const Text('Estimate Materials')),
+      if (_calculated) ...[
+        const SizedBox(height: 12),
+        const Divider(height: 16),
+        Text('Estimated Materials ($_buildingType)', style: const TextStyle(fontWeight: FontWeight.w700)),
+        const SizedBox(height: 8),
+        ..._materials.map((m) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Row(
+            children: [
+              Icon(m.icon, size: 20, color: AppColors.textMuted),
+              const SizedBox(width: 10),
+              Expanded(child: Text(m.label, style: const TextStyle(fontSize: 13))),
+              Text(m.value, style: const TextStyle(fontWeight: FontWeight.w600)),
+            ],
+          ),
+        )),
+      ],
+    ]);
+  }
+}
+
+class _MaterialRow {
+  final IconData icon;
+  final String label;
+  final String value;
+  const _MaterialRow(this.icon, this.label, this.value);
+}
+
+class _CurrencyCalc extends StatefulWidget {
+  const _CurrencyCalc();
+  @override
+  State<_CurrencyCalc> createState() => _CurrencyCalcState();
+}
+
+class _CurrencyCalcState extends State<_CurrencyCalc> {
+  final _amountCtrl = TextEditingController(text: '1');
+  String _from = 'USD';
+  String _to = 'INR';
+  String _result = '';
+  String _rateInfo = '';
+
+  static const _currencies = [
+    'USD', 'INR', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF',
+    'CNY', 'SGD', 'HKD', 'KRW', 'NZD', 'MXN', 'BRL', 'ZAR',
+    'RUB', 'TRY', 'AED', 'SAR',
+  ];
+
+  // Offline rates (relative to USD as base)
+  static const _usdRates = {
+    'USD': 1.0, 'INR': 83.5, 'EUR': 0.92, 'GBP': 0.79,
+    'JPY': 151.5, 'CAD': 1.37, 'AUD': 1.53, 'CHF': 0.90,
+    'CNY': 7.24, 'SGD': 1.34, 'HKD': 7.82, 'KRW': 1340.0,
+    'NZD': 1.65, 'MXN': 17.15, 'BRL': 5.05, 'ZAR': 18.60,
+    'RUB': 92.0, 'TRY': 32.20, 'AED': 3.67, 'SAR': 3.75,
+  };
+
+  void _convert() {
+    final amount = double.tryParse(_amountCtrl.text.trim());
+    if (amount == null || amount <= 0) {
+      setState(() => _result = 'Enter a valid amount');
+      return;
+    }
+    final fromRate = _usdRates[_from]!;
+    final toRate = _usdRates[_to]!;
+    final usdValue = amount / fromRate;
+    final converted = usdValue * toRate;
+    final f = NumberFormat('#,##0.00', 'en_US');
+    setState(() {
+      _result = '$amount $_from = ${f.format(converted)} $_to';
+      _rateInfo = '1 $_from = ${f.format(toRate / fromRate)} $_to';
+    });
+  }
+
+  @override
+  void dispose() {
+    _amountCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _card(children: [
+      _labelField('Amount', _amountCtrl, keyboardType: TextInputType.number),
+      const SizedBox(height: 8),
+      Row(
+        children: [
+          Expanded(
+            child: _dropdownField(
+              label: 'From',
+              value: _from,
+              items: _currencies.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+              onChanged: (v) => setState(() => _from = v!),
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8),
+            child: Icon(Icons.arrow_forward, color: AppColors.textMuted),
+          ),
+          Expanded(
+            child: _dropdownField(
+              label: 'To',
+              value: _to,
+              items: _currencies.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+              onChanged: (v) => setState(() => _to = v!),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 12),
+      FilledButton(onPressed: _convert, child: const Text('Convert')),
+      if (_result.isNotEmpty) ...[
+        const SizedBox(height: 12),
+        Text(_result, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+        const SizedBox(height: 4),
+        Text(_rateInfo, style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
+      ],
     ]);
   }
 }

@@ -86,17 +86,23 @@ class OpeningModel {
   final OpeningType type;
   double position; // 0.0 to 1.0 along the wall
   double width;
+  String designName;
+  Color designColor;
 
   OpeningModel({
     required this.type,
     required this.position,
     this.width = 40.0,
+    this.designName = 'Wooden',
+    this.designColor = const Color(0xFF8B5E3C),
   });
 
   Map<String, dynamic> toJson() => {
     'type': type.name,
     'position': position,
     'width': width,
+    'designName': designName,
+    'designColor': designColor.value,
   };
 
   factory OpeningModel.fromJson(Map<String, dynamic> json) {
@@ -104,6 +110,8 @@ class OpeningModel {
       type: json['type'] == 'window' ? OpeningType.window : OpeningType.door,
       position: json['position'].toDouble(),
       width: json['width'].toDouble(),
+      designName: json['designName'] ?? 'Wooden',
+      designColor: json['designColor'] != null ? Color(json['designColor']) : const Color(0xFF8B5E3C),
     );
   }
 }
@@ -118,38 +126,46 @@ class RoomData {
 
 class FurnitureModel {
   final String id;
-  final String type; // bed, chair, etc.
+  final String type; // sofa, bed, table, etc.
+  String styleName;
   Offset position;
   double rotation;
   double width;
   double height;
+  Color color;
 
   FurnitureModel({
     required this.id,
     required this.type,
     required this.position,
+    this.styleName = '',
     this.rotation = 0,
     this.width = 60,
     this.height = 60,
+    this.color = const Color(0xFFFF9800),
   });
 
   Map<String, dynamic> toJson() => {
     'id': id,
     'type': type,
+    'styleName': styleName,
     'position': {'x': position.dx, 'y': position.dy},
     'rotation': rotation,
     'width': width,
     'height': height,
+    'color': color.value,
   };
 
   factory FurnitureModel.fromJson(Map<String, dynamic> json) {
     return FurnitureModel(
       id: json['id'],
       type: json['type'],
+      styleName: json['styleName'] ?? '',
       position: Offset(json['position']['x'], json['position']['y']),
       rotation: json['rotation'].toDouble(),
       width: json['width'].toDouble(),
       height: json['height'].toDouble(),
+      color: json['color'] != null ? Color(json['color']) : const Color(0xFFFF9800),
     );
   }
 }
