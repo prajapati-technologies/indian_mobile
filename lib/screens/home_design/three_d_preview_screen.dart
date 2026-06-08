@@ -22,12 +22,34 @@ class _ThreeDPreviewScreenState extends State<ThreeDPreviewScreen> {
 
   void _onSceneCreated(cube.Scene scene) {
     _scene = scene;
-    scene.light.position.setFrom(vec.Vector3(0, 15, 20));
-    scene.camera.position.setFrom(vec.Vector3(0, 8, 25));
+    
+    // Multi-point lighting for premium feel
+    scene.light.position.setFrom(vec.Vector3(10, 20, 20));
+    scene.light.setColor(Colors.white, 0.8, 0.8, 0.8);
+    
+    scene.camera.position.setFrom(vec.Vector3(0, 15, 30));
     scene.camera.target.setFrom(vec.Vector3(0, 0, 0));
 
+    _buildFloor(scene);
     _buildWalls(scene);
     _buildFurniture(scene);
+  }
+
+  void _buildFloor(cube.Scene scene) {
+    final floor = cube.Object(
+      position: vec.Vector3(0, -0.05, 0),
+      scale: vec.Vector3(50, 0.1, 50),
+      mesh: _createColoredMesh(const Color(0xFFE5E5E5)),
+    );
+    scene.world.add(floor);
+    
+    // Add a subtle grid or accent line
+    final accent = cube.Object(
+      position: vec.Vector3(0, 0, 0),
+      scale: vec.Vector3(20, 0.01, 20),
+      mesh: _createColoredMesh(Colors.blue.withOpacity(0.1)),
+    );
+    scene.world.add(accent);
   }
 
   void _buildWalls(cube.Scene scene) {

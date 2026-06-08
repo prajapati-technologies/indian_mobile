@@ -2,9 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'project_editor_screen.dart';
 import '../../providers/canvas_provider.dart';
+import '../../services/api_service.dart';
 
 class CreateProjectScreen extends StatefulWidget {
-  const CreateProjectScreen({super.key});
+  final ApiService api;
+  final String? token;
+
+  const CreateProjectScreen({
+    super.key,
+    required this.api,
+    required this.token,
+  });
 
   @override
   State<CreateProjectScreen> createState() => _CreateProjectScreenState();
@@ -144,7 +152,10 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
 
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ProjectEditorScreen()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ProjectEditorScreen(
+          api: widget.api,
+          token: widget.token,
+        )));
       }
     });
   }

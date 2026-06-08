@@ -12,10 +12,19 @@ import '../../models/design_catalog.dart';
 import 'three_d_preview_screen.dart';
 import 'ai_interior_screen.dart';
 import 'create_project_screen.dart';
+import '../../services/api_service.dart';
 
 class ProjectEditorScreen extends StatefulWidget {
   final String? projectId;
-  const ProjectEditorScreen({super.key, this.projectId});
+  final ApiService api;
+  final String? token;
+
+  const ProjectEditorScreen({
+    super.key,
+    this.projectId,
+    required this.api,
+    required this.token,
+  });
   @override
   State<ProjectEditorScreen> createState() => _ProjectEditorScreenState();
 }
@@ -79,7 +88,20 @@ class _ProjectEditorScreenState extends State<ProjectEditorScreen> {
         actions: [
           IconButton(icon: Icon(Icons.undo, color: provider.canUndo ? Colors.black54 : Colors.grey.shade300), onPressed: provider.canUndo ? () => provider.undo() : null),
           IconButton(icon: Icon(Icons.redo, color: provider.canRedo ? Colors.black54 : Colors.grey.shade300), onPressed: provider.canRedo ? () => provider.redo() : null),
-          IconButton(icon: const Icon(Icons.auto_awesome, color: Colors.purple), tooltip: 'AI Design', onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AIInteriorScreen()))),
+          IconButton(
+            icon: const Icon(Icons.auto_awesome, color: Colors.purple),
+            tooltip: 'AI Design',
+            onPressed: () {
+              if (widget.token == null) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please login to use AI features')));
+                return;
+              }
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => AIInteriorScreen(api: widget.api, token: widget.token!)),
+              );
+            },
+          ),
           IconButton(icon: const Icon(Icons.view_in_ar, color: Colors.blue), tooltip: '3D View', onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ThreeDPreviewScreen(walls: provider.walls, furniture: provider.furniture)))),
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: Colors.black54),
@@ -205,7 +227,7 @@ class _ProjectEditorScreenState extends State<ProjectEditorScreen> {
 
   void _regenerateLayout(CanvasProvider provider) {
     if (provider.plotWidthFt <= 0) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const CreateProjectScreen()));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => CreateProjectScreen(api: widget.api, token: widget.token)));
       return;
     }
     showModalBottomSheet(
@@ -224,7 +246,7 @@ class _ProjectEditorScreenState extends State<ProjectEditorScreen> {
           )),
           const SizedBox(height: 12),
           SizedBox(width: double.infinity, child: OutlinedButton.icon(
-            onPressed: () { Navigator.pop(ctx); Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const CreateProjectScreen())); },
+            onPressed: () { Navigator.pop(ctx); Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => CreateProjectScreen(api: widget.api, token: widget.token))); },
             icon: const Icon(Icons.add),
             label: const Text('New Project'),
             style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),

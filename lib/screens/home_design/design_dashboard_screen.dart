@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'project_editor_screen.dart';
 import 'create_project_screen.dart';
+import 'ai_interior_screen.dart';
 import '../../services/api_service.dart';
 import '../../services/project_service.dart';
 import '../../models/home_design_models.dart';
@@ -72,6 +73,8 @@ class _DesignDashboardScreenState extends State<DesignDashboardScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildCreateNewButton(),
+              const SizedBox(height: 20),
+              _buildAIInteriorButton(),
               const SizedBox(height: 32),
               const Text('My Projects', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.black87)),
               const SizedBox(height: 16),
@@ -115,7 +118,7 @@ class _DesignDashboardScreenState extends State<DesignDashboardScreen> {
         child: InkWell(
           onTap: () {
             if (widget.token == null) { widget.onRequireLogin(); return; }
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateProjectScreen()));
+            Navigator.push(context, MaterialPageRoute(builder: (_) => CreateProjectScreen(api: widget.api, token: widget.token)));
           },
           child: Ink(
             width: double.infinity,
@@ -138,6 +141,58 @@ class _DesignDashboardScreenState extends State<DesignDashboardScreen> {
                 const Text('Create New Project', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white)),
                 const SizedBox(height: 4),
                 Text('Start designing your dream space', style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 13)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAIInteriorButton() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(color: Colors.purple.withOpacity(0.2), blurRadius: 20, offset: const Offset(0, 10)),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(20),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () {
+            if (widget.token == null) { widget.onRequireLogin(); return; }
+            Navigator.push(context, MaterialPageRoute(builder: (_) => AIInteriorScreen(api: widget.api, token: widget.token!)));
+          },
+          child: Ink(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.purple.shade700, Colors.deepPurple.shade400],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), shape: BoxShape.circle),
+                  child: const Icon(Icons.auto_awesome, size: 30, color: Colors.white),
+                ),
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('AI Interior Designer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white)),
+                    const SizedBox(height: 4),
+                    Text('Generate room designs with AI', style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 13)),
+                  ],
+                ),
               ],
             ),
           ),
@@ -186,7 +241,11 @@ class _DesignDashboardScreenState extends State<DesignDashboardScreen> {
   }
 
   void _openProject(ProjectModel project) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => ProjectEditorScreen(projectId: project.id)));
+    Navigator.push(context, MaterialPageRoute(builder: (_) => ProjectEditorScreen(
+      projectId: project.id,
+      api: widget.api,
+      token: widget.token,
+    )));
   }
 
   Widget _buildTemplateCategories() {
@@ -225,7 +284,7 @@ class _DesignDashboardScreenState extends State<DesignDashboardScreen> {
           onTap: () {
             if (widget.token == null) { widget.onRequireLogin(); return; }
             // Navigate to create with pre-filled dimensions
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateProjectScreen()));
+            Navigator.push(context, MaterialPageRoute(builder: (_) => CreateProjectScreen(api: widget.api, token: widget.token)));
           },
           child: Padding(
             padding: const EdgeInsets.all(16),

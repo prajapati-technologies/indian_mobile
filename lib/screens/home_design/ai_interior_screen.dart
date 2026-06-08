@@ -1,8 +1,15 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
+import '../../services/api_service.dart';
 
 class AIInteriorScreen extends StatefulWidget {
-  const AIInteriorScreen({super.key});
+  final ApiService api;
+  final String token;
+
+  const AIInteriorScreen({
+    super.key,
+    required this.api,
+    required this.token,
+  });
 
   @override
   State<AIInteriorScreen> createState() => _AIInteriorScreenState();
@@ -13,13 +20,7 @@ class _AIInteriorScreenState extends State<AIInteriorScreen> {
   bool _isGenerating = false;
   String? _generatedImageUrl;
   String? _error;
-  final _imageSeeds = [
-    'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600',
-    'https://images.unsplash.com/photo-1618220179428-22790b461013?w=600',
-    'https://images.unsplash.com/photo-1616137466211-f939a420be84?w=600',
-    'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=600',
-    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600',
-  ];
+  final _imageSeeds = []; // No longer needed
 
   @override
   void dispose() {
@@ -40,14 +41,26 @@ class _AIInteriorScreenState extends State<AIInteriorScreen> {
       _generatedImageUrl = null;
     });
 
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      final response = await widget.api.postJson(
+        '/ai/generate-interior',
+        {'prompt': prompt},
+        token: widget.token,
+      );
 
-    if (mounted) {
-      final random = Random(prompt.hashCode);
-      setState(() {
-        _generatedImageUrl = _imageSeeds[random.nextInt(_imageSeeds.length)];
-        _isGenerating = false;
-      });
+      if (mounted) {
+        setState(() {
+          _generatedImageUrl = response['url'];
+          _isGenerating = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'Failed to generate design: ${e.toString()}';
+          _isGenerating = false;
+        });
+      }
     }
   }
 

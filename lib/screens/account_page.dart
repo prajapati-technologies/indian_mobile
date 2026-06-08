@@ -13,6 +13,7 @@ import 'news_detail_page.dart';
 import 'register_page.dart';
 import 'spin_wheel_page.dart';
 import 'earnings_page.dart';
+import 'support_page.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({
@@ -379,10 +380,10 @@ class _AccountPageState extends State<AccountPage> {
         _linkTile(
           context,
           icon: Icons.support_agent_outlined,
-          label: 'Support Tickets',
+          label: 'Support & Help',
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Support Tickets coming soon!')),
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SupportPage()),
             );
           },
         ),

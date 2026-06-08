@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../services/api_service.dart';
 import '../widgets/auth_layout.dart';
 import 'register_page.dart';
@@ -61,6 +62,51 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      if (mounted) {
+        setState(() => _busy = false);
+      }
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() => _busy = true);
+    try {
+      final googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+      );
+      
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        setState(() => _busy = false);
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      
+      final j = await widget.api.postJson('/auth/google', {
+        'id': googleUser.id,
+        'email': googleUser.email,
+        'name': googleUser.displayName,
+        'photoUrl': googleUser.photoUrl,
+        'idToken': googleAuth.idToken, // Optional: for backend verification
+      });
+
+      final token = j['token'] as String?;
+      if (!mounted) return;
+      
+      if (token != null) {
+        if (widget.onSuccess != null) {
+          widget.onSuccess!(token);
+        } else {
+          Navigator.of(context).pop(token);
+        }
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Google Sign In failed: ${e.toString()}')),
+      );
     } finally {
       if (mounted) {
         setState(() => _busy = false);
@@ -233,7 +279,7 @@ class _LoginPageState extends State<LoginPage> {
                 _SocialLoginButton(
                   icon: Icons.g_mobiledata,
                   color: Colors.red,
-                  onTap: () {},
+                  onTap: _handleGoogleSignIn,
                 ),
                 const SizedBox(width: 16),
                 _SocialLoginButton(
