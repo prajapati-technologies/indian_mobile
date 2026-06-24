@@ -139,31 +139,71 @@ class _AppShellState extends State<AppShell> {
           const LocalExplorerScreen(),
         ],
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _tab,
-        onDestinationSelected: (i) => setState(() => _tab = i),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.handyman_outlined),
-            selectedIcon: Icon(Icons.handyman),
-            label: 'Tools',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.storefront_outlined),
-            selectedIcon: Icon(Icons.storefront),
-            label: 'Directory',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.explore_outlined),
-            selectedIcon: Icon(Icons.explore),
-            label: 'Explore',
-          ),
-        ],
+      bottomNavigationBar: Container(
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.brandNavy.withValues(alpha: 0.12),
+              blurRadius: 20,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Tricolor strip at top of footer
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(24),
+                topRight: Radius.circular(24),
+              ),
+              child: Row(
+                children: [
+                  Expanded(child: Container(height: 3, color: const Color(0xFFFF9933))), // Saffron
+                  Expanded(child: Container(height: 3, color: Colors.white)),             // White
+                  Expanded(child: Container(height: 3, color: const Color(0xFF138808))), // Green
+                ],
+              ),
+            ),
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
+              ),
+              child: NavigationBar(
+                selectedIndex: _tab,
+                onDestinationSelected: (i) => setState(() => _tab = i),
+                height: 68,
+                destinations: const [
+                  NavigationDestination(
+                    icon: Icon(Icons.home_rounded, size: 26),
+                    selectedIcon: Icon(Icons.home_rounded, size: 28),
+                    label: 'Home',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.handyman_rounded, size: 26),
+                    selectedIcon: Icon(Icons.handyman_rounded, size: 28),
+                    label: 'Tools',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.storefront_rounded, size: 26),
+                    selectedIcon: Icon(Icons.storefront_rounded, size: 28),
+                    label: 'Directory',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.explore_rounded, size: 26),
+                    selectedIcon: Icon(Icons.explore_rounded, size: 28),
+                    label: 'Explore',
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

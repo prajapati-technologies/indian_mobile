@@ -6,6 +6,10 @@ abstract final class AppColors {
   static const Color brandNavy = Color(0xFF0B2C5F);
   static const Color brandNavyHover = Color(0xFF0A254F);
   static const Color brandOrange = Color(0xFFFF6A00);
+  /// Indian tricolor
+  static const Color saffron = Color(0xFFFF9933);
+  static const Color indiaGreen = Color(0xFF138808);
+  static const Color ashokBlue = Color(0xFF000080);
   /// `--brand-green` on web news cards
   static const Color brandGreen = Color(0xFF138808);
   static const Color pageBackground = Color(0xFFF3F7FD);
@@ -60,9 +64,6 @@ ThemeData buildIndianInformationTheme() {
         fontSize: 20,
         fontWeight: FontWeight.w600,
       ),
-      shape: Border(
-        bottom: BorderSide(color: orange, width: 3),
-      ),
     ),
     cardTheme: CardThemeData(
       color: Colors.white,
@@ -93,24 +94,28 @@ ThemeData buildIndianInformationTheme() {
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: Colors.white,
-      elevation: 8,
-      shadowColor: navy.withValues(alpha: 0.08),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      shadowColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
-      indicatorColor: orange.withValues(alpha: 0.18),
+      indicatorColor: const Color(0xFFFF9933).withValues(alpha: 0.15),
+      indicatorShape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+      ),
       labelTextStyle: WidgetStateProperty.resolveWith((states) {
         final selected = states.contains(WidgetState.selected);
         return TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: selected ? navy : AppColors.textMuted,
+          fontSize: 11,
+          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+          color: selected ? const Color(0xFFFF9933) : AppColors.textMuted,
+          letterSpacing: 0.3,
         );
       }),
       iconTheme: WidgetStateProperty.resolveWith((states) {
         final selected = states.contains(WidgetState.selected);
         return IconThemeData(
-          color: selected ? navy : AppColors.textMuted,
-          size: 24,
+          color: selected ? const Color(0xFFFF9933) : AppColors.textMuted,
+          size: selected ? 28 : 24,
         );
       }),
     ),
