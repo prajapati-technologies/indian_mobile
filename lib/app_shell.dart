@@ -9,7 +9,6 @@ import 'services/api_service.dart';
 import 'services/auth_store.dart';
 import 'services/api_url_store.dart';
 import 'theme/app_theme.dart';
-import 'screens/home_design/design_dashboard_screen.dart';
 import 'screens/business_directory_page.dart';
 
 class AppShell extends StatefulWidget {
@@ -137,7 +136,6 @@ class _AppShellState extends State<AppShell> {
           ),
           ToolsPage(api: api, token: _token, onRequireLogin: _requireLogin),
           BusinessDirectoryPage(api: api, token: _token, onRequireLogin: _requireLogin),
-          DesignDashboardScreen(api: api, token: _token, onRequireLogin: _requireLogin),
           const LocalExplorerScreen(),
         ],
       ),
@@ -159,11 +157,6 @@ class _AppShellState extends State<AppShell> {
             icon: Icon(Icons.storefront_outlined),
             selectedIcon: Icon(Icons.storefront),
             label: 'Directory',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.architecture_outlined),
-            selectedIcon: Icon(Icons.architecture),
-            label: 'Home Design',
           ),
           NavigationDestination(
             icon: Icon(Icons.explore_outlined),
