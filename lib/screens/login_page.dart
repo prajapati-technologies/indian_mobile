@@ -281,18 +281,8 @@ class _LoginPageState extends State<LoginPage> {
                   color: Colors.red,
                   onTap: _handleGoogleSignIn,
                 ),
-                const SizedBox(width: 16),
-                _SocialLoginButton(
-                  icon: Icons.facebook,
-                  color: Colors.blue,
-                  onTap: () {},
-                ),
-                const SizedBox(width: 16),
-                _SocialLoginButton(
-                  icon: Icons.apple,
-                  color: Colors.black,
-                  onTap: () {},
-                ),
+                // TODO: Add Facebook & Apple Sign-In before store submission
+                // Apple Sign-In is REQUIRED by App Store if offering other social logins
               ],
             ),
             const SizedBox(height: 40),

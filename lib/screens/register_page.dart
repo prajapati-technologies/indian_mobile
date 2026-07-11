@@ -305,18 +305,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   color: Colors.red,
                   onTap: () {},
                 ),
-                const SizedBox(width: 16),
-                _SocialLoginButton(
-                  icon: Icons.facebook,
-                  color: Colors.blue,
-                  onTap: () {},
-                ),
-                const SizedBox(width: 16),
-                _SocialLoginButton(
-                  icon: Icons.apple,
-                  color: Colors.black,
-                  onTap: () {},
-                ),
+                // TODO: Add Apple Sign-In before App Store submission
               ],
             ),
             const SizedBox(height: 40),
