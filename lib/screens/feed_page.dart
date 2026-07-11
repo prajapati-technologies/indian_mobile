@@ -10,7 +10,6 @@ import '../widgets/reels_feed.dart';
 import 'category_news_page.dart';
 import 'news_detail_page.dart';
 
-/// Home / News tab — layout aligned with web `home.blade.php` (logo header, cards, green accent).
 class FeedPage extends StatefulWidget {
   const FeedPage({
     super.key,
@@ -21,14 +20,8 @@ class FeedPage extends StatefulWidget {
   });
 
   final ApiService api;
-
-  /// Public site origin (`…/public`) for logo `images/site-logo.png`.
   final String webOrigin;
-
-  /// Switches to Account tab so user can set API URL (real device + PC IP).
   final VoidCallback? onOpenServerSettings;
-
-  /// Same as website header — jump to Account tab.
   final VoidCallback? onOpenAccountTab;
 
   @override
@@ -36,46 +29,38 @@ class FeedPage extends StatefulWidget {
 }
 
 class _FeedPageState extends State<FeedPage> {
-  static const int _newsBatchSize = 15;
-
   bool _loading = true;
-  bool _loadingMore = false;
-  int _currentPage = 1;
-  int _lastPage = 1;
   String? _error;
   bool _connectionError = false;
   List<dynamic> _banners = [];
-  List<dynamic> _news = [];
   List<dynamic> _categories = [];
+  List<dynamic> _featuredSections = [];
 
-  /// View mode: 1 for Reels, 0 for List (Default Reels as per user request)
   int _viewMode = 1;
 
-  // AdMob State
   BannerAd? _bannerAd;
   bool _isBannerLoaded = false;
-  final ScrollController _scrollController = ScrollController();
 
   String get _logoUrl => '${widget.webOrigin}/images/site-logo.png';
-
-  bool get _hasMoreNewsToShow => _currentPage < _lastPage;
 
   Future<void> _load() async {
     setState(() {
       _loading = true;
       _error = null;
-      _currentPage = 1;
     });
     try {
-      final b = await widget.api.getJson('/banners') as Map<String, dynamic>;
-      final n = await widget.api.getJson('/news?page=1') as Map<String, dynamic>;
-      final c = await widget.api.getJson('/categories') as Map<String, dynamic>;
+      final results = await Future.wait([
+        widget.api.getJson('/banners'),
+        widget.api.getJson('/news/featured-categories'),
+        widget.api.getJson('/categories'),
+      ]);
+      final b = results[0] as Map<String, dynamic>;
+      final f = results[1] as Map<String, dynamic>;
+      final c = results[2] as Map<String, dynamic>;
 
       setState(() {
         _banners = (b['data'] as List<dynamic>?) ?? [];
-        _news = (n['data'] as List<dynamic>?) ?? [];
-        _currentPage = (n['current_page'] as int?) ?? 1;
-        _lastPage = (n['last_page'] as int?) ?? 1;
+        _featuredSections = (f['data'] as List<dynamic>?) ?? [];
         _categories = (c['data'] as List<dynamic>?) ?? [];
         _connectionError = false;
         _loading = false;
@@ -85,29 +70,6 @@ class _FeedPageState extends State<FeedPage> {
         _connectionError = e is ApiConnectionException;
         _error = e is ApiConnectionException ? e.message : e.toString();
         _loading = false;
-      });
-    }
-  }
-
-  Future<void> _loadMoreNews() async {
-    if (_loadingMore || !_hasMoreNewsToShow) return;
-    setState(() {
-      _loadingMore = true;
-    });
-    try {
-      final nextPage = _currentPage + 1;
-      final n = await widget.api.getJson('/news?page=$nextPage') as Map<String, dynamic>;
-      
-      setState(() {
-        final newItems = (n['data'] as List<dynamic>?) ?? [];
-        _news.addAll(newItems);
-        _currentPage = (n['current_page'] as int?) ?? nextPage;
-        _lastPage = (n['last_page'] as int?) ?? nextPage;
-        _loadingMore = false;
-      });
-    } catch (e) {
-      setState(() {
-        _loadingMore = false;
       });
     }
   }
@@ -371,7 +333,7 @@ class _FeedPageState extends State<FeedPage> {
         children: [
           Expanded(
             child: _viewMode == 1
-                ? ReelsFeed(news: _news, onRefresh: _load)
+                ? ReelsFeed(news: _featuredSections.isEmpty ? [] : _featuredSections.first['news'] as List<dynamic>? ?? [], onRefresh: _load)
                 : RefreshIndicator(
                     color: AppColors.brandOrange,
                     onRefresh: _load,
@@ -457,7 +419,6 @@ class _FeedPageState extends State<FeedPage> {
             ),
           ),
           const SizedBox(height: 16),
-
           OutlinedButton.icon(
             onPressed: _load,
             icon: const Icon(Icons.refresh, size: 20),
@@ -539,155 +500,103 @@ class _FeedPageState extends State<FeedPage> {
             ),
           ),
 
-        // 3. Top Stories
-        if (_news.isNotEmpty)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Top Stories',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Colors.black87,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.5,
-                          ),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: _openCategoriesBottomSheet,
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.brandOrange,
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('View All', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                        SizedBox(width: 2),
-                        Icon(Icons.chevron_right, size: 16),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-        if (_news.isNotEmpty)
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final topCount = _news.length > 5 ? 5 : _news.length;
-                if (index >= topCount) return null;
-                final row = _news[index] as Map<String, dynamic>;
-                return Column(
-                  children: [
-                    NewsFeedCard(
-                      item: row,
-                      onTap: () {
-                        final slug = row['slug'] as String?;
-                        if (slug == null) return;
-                        Navigator.of(context).push(
-                          MaterialPageRoute<void>(builder: (ctx) => NewsDetailPage(api: widget.api, slug: slug)),
-                        );
-                      },
-                    ),
-                    if (index < topCount - 1)
-                      const Divider(height: 1, indent: 16, endIndent: 16, color: AppColors.borderLight),
-                  ],
-                );
-              },
-              childCount: _news.length > 5 ? 5 : _news.length,
-            ),
-          ),
-
-        if (_news.isEmpty)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
-              child: Material(
-                color: const Color(0xFFFFF3CD),
-                borderRadius: BorderRadius.circular(8),
-                child: const Padding(
-                  padding: EdgeInsets.all(14),
-                  child: Text(
-                    'Koi news record available nahi hai. Admin panel se "Sync Today\'s News" chalaiye.',
-                    style: TextStyle(color: Color(0xFF664D03)),
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-        // 4. Latest News
-        if (_news.length > 5)
+        // 3. Featured Category Sections
+        if (_featuredSections.isEmpty && _categories.isNotEmpty)
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
               child: Text(
-                'Latest News',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
-                    ),
+                'No featured categories. Admin panel me categories ko featured mark karein.',
+                style: TextStyle(color: AppColors.textMuted, fontSize: 14),
               ),
             ),
           ),
 
-        if (_news.length > 5)
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final i = index + 5;
-                if (i >= _news.length) return null;
-                final row = _news[i] as Map<String, dynamic>;
-                return Column(
-                  children: [
-                    NewsFeedCard(
-                      item: row,
-                      onTap: () {
-                        final slug = row['slug'] as String?;
-                        if (slug == null) return;
-                        Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (ctx) => NewsDetailPage(api: widget.api, slug: slug),
-                          ),
-                        );
-                      },
-                    ),
-                    if (i < _news.length - 1)
-                      const Divider(height: 1, indent: 16, endIndent: 16, color: AppColors.borderLight),
-                  ],
-                );
-              },
-              childCount: _news.length - 5,
-            ),
-          ),
+        ..._featuredSections.map((section) {
+          final catName = section['name'] as String? ?? '';
+          final catSlug = section['slug'] as String? ?? '';
+          final newsList = (section['news'] as List<dynamic>?) ?? [];
+          if (newsList.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
 
-        if (_hasMoreNewsToShow)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              child: OutlinedButton(
-                onPressed: _loadingMore ? null : _loadMoreNews,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.brandNavy,
-                  side: const BorderSide(color: AppColors.brandNavy),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+          return SliverMainAxisGroup(
+            slivers: [
+              // Category header with View More
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          catName,
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: Colors.black87,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.5,
+                              ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => CategoryNewsPage(
+                                api: widget.api,
+                                slug: catSlug,
+                                title: catName,
+                              ),
+                            ),
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.brandOrange,
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('View More', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                            SizedBox(width: 2),
+                            Icon(Icons.chevron_right, size: 16),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                child: _loadingMore 
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text('Load More'),
               ),
-            ),
-          ),
-        if (_news.isNotEmpty)
+              // News cards for this category
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final item = newsList[index] as Map<String, dynamic>;
+                    return Column(
+                      children: [
+                        NewsFeedCard(
+                          item: item,
+                          onTap: () {
+                            final slug = item['slug'] as String?;
+                            if (slug == null) return;
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(builder: (ctx) => NewsDetailPage(api: widget.api, slug: slug)),
+                            );
+                          },
+                        ),
+                        if (index < newsList.length - 1)
+                          const Divider(height: 1, indent: 16, endIndent: 16, color: AppColors.borderLight),
+                      ],
+                    );
+                  },
+                  childCount: newsList.length,
+                ),
+              ),
+            ],
+          );
+        }),
+
+        if (_featuredSections.isNotEmpty)
           SliverToBoxAdapter(
             child: SizedBox(height: MediaQuery.paddingOf(context).bottom + 28),
           ),
@@ -696,7 +605,6 @@ class _FeedPageState extends State<FeedPage> {
   }
 }
 
-/// Matches web `.latest-mini-card` + `.latest-mini-title` / `.latest-mini-meta`.
 class _LatestMiniCard extends StatelessWidget {
   const _LatestMiniCard({
     required this.item,
@@ -707,7 +615,6 @@ class _LatestMiniCard extends StatelessWidget {
   final Map<String, dynamic> item;
   final VoidCallback onTap;
 
-  /// Two-column grid: shorter image + tighter text so cells fit [childAspectRatio].
   final bool compact;
 
   static String _titleWeb(Map<String, dynamic> item) {

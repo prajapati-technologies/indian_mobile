@@ -23,20 +23,24 @@ class CategoryNewsPage extends StatefulWidget {
 
 class _CategoryNewsPageState extends State<CategoryNewsPage> {
   bool _loading = true;
+  bool _loadingMore = false;
   String? _error;
   List<dynamic> _news = [];
+  int _currentPage = 1;
+  int _lastPage = 1;
+  final ScrollController _scrollController = ScrollController();
+
+  bool get _hasMore => _currentPage < _lastPage;
 
   Future<void> _load() async {
     setState(() {
       _loading = true;
       _error = null;
+      _currentPage = 1;
     });
     try {
-      final n = await widget.api.getJson('/news/category/${widget.slug}');
-      setState(() {
-        _news = (n['data'] as List<dynamic>?) ?? [];
-        _loading = false;
-      });
+      final n = await widget.api.getJson('/news/category/${widget.slug}?page=1');
+      _handleResponse(n);
     } catch (e) {
       setState(() {
         _error = e is ApiConnectionException ? e.message : e.toString();
@@ -45,10 +49,53 @@ class _CategoryNewsPageState extends State<CategoryNewsPage> {
     }
   }
 
+  void _handleResponse(dynamic n) {
+    final data = n as Map<String, dynamic>;
+    setState(() {
+      _news = (data['data'] as List<dynamic>?) ?? [];
+      _currentPage = (data['current_page'] as int?) ?? 1;
+      _lastPage = (data['last_page'] as int?) ?? 1;
+      _loading = false;
+    });
+  }
+
+  Future<void> _loadMore() async {
+    if (_loadingMore || !_hasMore) return;
+    setState(() => _loadingMore = true);
+    try {
+      final next = _currentPage + 1;
+      final n = await widget.api.getJson('/news/category/${widget.slug}?page=$next');
+      final data = n as Map<String, dynamic>;
+      final newItems = (data['data'] as List<dynamic>?) ?? [];
+      setState(() {
+        _news.addAll(newItems);
+        _currentPage = (data['current_page'] as int?) ?? next;
+        _lastPage = (data['last_page'] as int?) ?? next;
+        _loadingMore = false;
+      });
+    } catch (e) {
+      setState(() => _loadingMore = false);
+    }
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      _loadMore();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     _load();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -94,10 +141,17 @@ class _CategoryNewsPageState extends State<CategoryNewsPage> {
     }
 
     return ListView.separated(
+      controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
-      itemCount: _news.length,
+      itemCount: _news.length + (_hasMore ? 1 : 0),
       separatorBuilder: (context, index) => const Divider(height: 1, indent: 16, endIndent: 16, color: AppColors.borderLight),
       itemBuilder: (context, index) {
+        if (index == _news.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          );
+        }
         final item = _news[index] as Map<String, dynamic>;
         return NewsFeedCard(
           item: item,
