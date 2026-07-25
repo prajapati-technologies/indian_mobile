@@ -32,6 +32,7 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _obscurePassword = true;
   bool _obscurePassword2 = true;
   bool _agreedToTerms = false;
+  String? _emailError;
 
   @override
   void dispose() {
@@ -41,6 +42,23 @@ class _RegisterPageState extends State<RegisterPage> {
     _password.dispose();
     _password2.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkEmail(String email) async {
+    if (email.trim().isEmpty || !email.contains('@')) {
+      setState(() => _emailError = null);
+      return;
+    }
+    try {
+      final j = await widget.api.postJson('/auth/check-email', {'email': email.trim()});
+      if (mounted) {
+        setState(() {
+          _emailError = (j['exists'] == true) ? 'This email is already registered' : null;
+        });
+      }
+    } catch (_) {
+      // Silently fail — validation will catch on submit
+    }
   }
 
   Future<void> _submit() async {
@@ -143,41 +161,51 @@ class _RegisterPageState extends State<RegisterPage> {
               'Create Account',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 28,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF0F2C59),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             const Text(
               'Join us and stay updated with real information',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.grey,
-                fontSize: 14,
+                fontSize: 13,
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 10),
             TextFormField(
               controller: _name,
               decoration: _inputDecoration('Full Name', Icons.person_outline),
               validator: (v) => v == null || v.trim().isEmpty ? 'Enter name' : null,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             TextFormField(
               controller: _email,
-              decoration: _inputDecoration('Email Address', Icons.email_outlined),
+              decoration: _inputDecoration('Email Address', Icons.email_outlined).copyWith(
+                errorText: _emailError,
+              ),
               keyboardType: TextInputType.emailAddress,
-              validator: (v) => v == null || v.trim().isEmpty ? 'Enter email' : null,
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) return 'Enter email';
+                if (_emailError != null) return _emailError;
+                return null;
+              },
+              onChanged: (v) {
+                if (v.contains('@') && v.contains('.')) {
+                  _checkEmail(v);
+                }
+              },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             TextFormField(
               controller: _mobile,
-              decoration: _inputDecoration('Mobile Number', Icons.phone_outlined),
+              decoration: _inputDecoration('Mobile Number (Optional)', Icons.phone_outlined),
               keyboardType: TextInputType.phone,
-              validator: (v) => v == null || v.trim().isEmpty ? 'Enter mobile number' : null,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             TextFormField(
               controller: _password,
               obscureText: _obscurePassword,
@@ -196,7 +224,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               validator: (v) => v == null || v.length < 6 ? 'Min 6 characters' : null,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             TextFormField(
               controller: _password2,
               obscureText: _obscurePassword2,
@@ -215,7 +243,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               validator: (v) => v != _password.text ? 'Passwords do not match' : null,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -258,7 +286,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _busy ? null : _submit,
               style: ElevatedButton.styleFrom(
@@ -285,7 +313,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       ],
                     ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(child: Divider(color: Colors.grey.shade300)),
@@ -296,7 +324,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 Expanded(child: Divider(color: Colors.grey.shade300)),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -308,7 +336,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 // TODO: Add Apple Sign-In before App Store submission
               ],
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

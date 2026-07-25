@@ -31,8 +31,28 @@ class _AppShellState extends State<AppShell> {
     AuthStore.readToken().then((t) {
       if (mounted) {
         setState(() => _token = t);
+        // If not logged in, show login screen
+        if (t == null || t.isEmpty) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _showAuthScreen();
+          });
+        }
       }
     });
+  }
+
+  void _showAuthScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AccountPage(
+          api: _api ?? ApiService(AppConfig.apiBaseUrl),
+          token: _token,
+          onTokenChanged: _setToken,
+          onApiReload: _reloadApiAfterUrlChange,
+        ),
+      ),
+    );
   }
 
   Future<void> _bootstrap() async {

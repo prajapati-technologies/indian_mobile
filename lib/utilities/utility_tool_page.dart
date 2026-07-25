@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import '../services/ad_service.dart';
 import '../theme/app_theme.dart';
@@ -118,8 +119,15 @@ class _UtilityToolPageState extends State<UtilityToolPage> {
       case 'pdf-password-protect':
         return const PdfPasswordToolBody();
       default:
-        return const Center(
-          child: Text('Unknown tool'),
+        // Load from website via WebView for all other tools
+        final url = 'https://indiainformations.com/calculators/${widget.toolKey}';
+        return SizedBox(
+          height: MediaQuery.of(context).size.height * 0.75,
+          child: WebViewWidget(
+            controller: WebViewController()
+              ..setJavaScriptMode(JavaScriptMode.unrestricted)
+              ..loadRequest(Uri.parse(url)),
+          ),
         );
     }
   }

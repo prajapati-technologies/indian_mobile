@@ -89,6 +89,9 @@ class _AccountPageState extends State<AccountPage> {
       } catch (_) {}
     }
     widget.onTokenChanged(null);
+    if (mounted) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
   }
 
   Future<void> _claim() async {
@@ -181,13 +184,19 @@ class _AccountPageState extends State<AccountPage> {
           if (_showRegister)
             RegisterPage(
               api: widget.api,
-              onSuccess: (tok) => widget.onTokenChanged(tok),
+              onSuccess: (tok) {
+                widget.onTokenChanged(tok);
+                if (mounted) Navigator.of(context).pop();
+              },
               onSwitchToLogin: () => setState(() => _showRegister = false),
             )
           else
             LoginPage(
               api: widget.api,
-              onSuccess: (tok) => widget.onTokenChanged(tok),
+              onSuccess: (tok) {
+                widget.onTokenChanged(tok);
+                if (mounted) Navigator.of(context).pop();
+              },
               onSwitchToRegister: () => setState(() => _showRegister = true),
             ),
         ],
@@ -198,8 +207,11 @@ class _AccountPageState extends State<AccountPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        automaticallyImplyLeading: false,
-        titleSpacing: 16,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF0F2C59)),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        titleSpacing: 0,
         title: const Text('My Account'),
       ),
       body: RefreshIndicator(
@@ -546,14 +558,14 @@ class _AccountPageState extends State<AccountPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Level Progress', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.textMuted)),
-                          Text('${user['xp'] % 100}/100 XP', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.brandOrange)),
+                          Text('${(user['xp'] ?? 0) % 100}/100 XP', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.brandOrange)),
                         ],
                       ),
                       const SizedBox(height: 6),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: LinearProgressIndicator(
-                          value: (user['xp'] % 100) / 100.0,
+                          value: ((user['xp'] ?? 0) % 100) / 100.0,
                           backgroundColor: AppColors.cardMutedBg,
                           color: AppColors.brandOrange,
                           minHeight: 8,

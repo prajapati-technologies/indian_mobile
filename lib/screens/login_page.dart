@@ -158,28 +158,28 @@ class _LoginPageState extends State<LoginPage> {
               'Welcome Back!',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 28,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF0F2C59),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             const Text(
               'Login to continue to your account',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.grey,
-                fontSize: 14,
+                fontSize: 13,
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 20),
             TextFormField(
               controller: _email,
               decoration: _inputDecoration('Email or Mobile Number', Icons.person_outline),
               keyboardType: TextInputType.emailAddress,
               validator: (v) => v == null || v.trim().isEmpty ? 'Enter email' : null,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             TextFormField(
               controller: _password,
               obscureText: _obscurePassword,
@@ -234,7 +234,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _busy ? null : _submit,
               style: ElevatedButton.styleFrom(
@@ -261,7 +261,7 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                     ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 20),
             Row(
               children: [
                 Expanded(child: Divider(color: Colors.grey.shade300)),
@@ -272,7 +272,7 @@ class _LoginPageState extends State<LoginPage> {
                 Expanded(child: Divider(color: Colors.grey.shade300)),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -285,7 +285,7 @@ class _LoginPageState extends State<LoginPage> {
                 // Apple Sign-In is REQUIRED by App Store if offering other social logins
               ],
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

@@ -4,32 +4,68 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import '../services/ad_service.dart';
 import '../theme/app_theme.dart';
 
 /// Same keys / titles as `calculators.blade.php` sidebar.
 const List<({String key, String title, String subtitle, IconData icon, Color color})> kCalculatorMenu = [
-  (key: 'mortgage-calc', title: 'Mortgage Calculator', subtitle: 'Calculate home loan payments', icon: Icons.home_work_outlined, color: Color(0xFF1976D2)),
-  (key: 'emi-calc', title: 'EMI Calculator', subtitle: 'Calculate your loan EMI instantly', icon: Icons.account_balance_outlined, color: Color(0xFFFF7043)),
-  (key: 'sip-calc', title: 'SIP Calculator', subtitle: 'Plan your mutual fund investments', icon: Icons.trending_up_outlined, color: Color(0xFF4CAF50)),
-  (key: 'tax-calc', title: 'Tax Calculator', subtitle: 'Calculate your income tax easily', icon: Icons.receipt_long_outlined, color: Color(0xFF9C27B0)),
-  (key: 'bmi-calc', title: 'BMI Calculator', subtitle: 'Check your body mass index', icon: Icons.monitor_weight_outlined, color: Color(0xFFE91E63)),
-  (key: 'calorie-calc', title: 'Calories Calculator', subtitle: 'Track your daily calorie needs', icon: Icons.local_fire_department_outlined, color: Color(0xFFFF9800)),
-  (key: 'unit-calc', title: 'Unit Converter', subtitle: 'Convert between different units', icon: Icons.straighten_outlined, color: Color(0xFF00BCD4)),
-  (key: 'temp-calc', title: 'Temperature Converter', subtitle: 'Convert Celsius and Fahrenheit', icon: Icons.thermostat_outlined, color: Color(0xFFFF5722)),
-  (key: 'age-calc', title: 'Age Calculator', subtitle: 'Calculate your exact age', icon: Icons.cake_outlined, color: Color(0xFF8BC34A)),
-  (key: 'time-calc', title: 'Time Difference', subtitle: 'Calculate time between dates', icon: Icons.schedule_outlined, color: Color(0xFF3F51B5)),
-  (key: 'love-calc', title: 'Love Calculator', subtitle: 'Fun love compatibility tool', icon: Icons.favorite_outline, color: Color(0xFFE91E63)),
-  (key: 'compat-calc', title: 'Compatibility', subtitle: 'Check partner compatibility', icon: Icons.group_outlined, color: Color(0xFF009688)),
-  (key: 'horo-calc', title: 'Horoscope Calculator', subtitle: 'Check your daily horoscope', icon: Icons.stars_outlined, color: Color(0xFF673AB7)),
-  (key: 'gst-calc', title: 'GST Calculator', subtitle: 'Calculate GST amounts & totals', icon: Icons.receipt_outlined, color: Color(0xFF7B1FA2)),
-  (key: 'fdrd-calc', title: 'FD/RD Calculator', subtitle: 'Calculate fixed/recurring deposit returns', icon: Icons.account_balance_outlined, color: Color(0xFF1565C0)),
-  (key: 'percent-calc', title: 'Percentage Calculator', subtitle: 'Calculate percentages easily', icon: Icons.percent_outlined, color: Color(0xFF00897B)),
-  (key: 'fuel-calc', title: 'Fuel Cost Calculator', subtitle: 'Calculate trip fuel cost', icon: Icons.local_gas_station_outlined, color: Color(0xFFE65100)),
-  (key: 'electricity-calc', title: 'Electricity Bill Calculator', subtitle: 'Calculate your electricity bill', icon: Icons.bolt_outlined, color: Color(0xFFF9A825)),
-  (key: 'material-calc', title: 'Material Estimator', subtitle: 'Estimate construction materials', icon: Icons.construction_outlined, color: Color(0xFF37474F)),
-  (key: 'currency-calc', title: 'Currency Converter', subtitle: 'Convert currencies with live rates', icon: Icons.monetization_on_outlined, color: Color(0xFF2E7D32)),
+  // Finance
+  (key: 'emi-calc', title: 'EMI Calculator', subtitle: 'Calculate your loan EMI', icon: Icons.account_balance_outlined, color: Color(0xFFFF7043)),
+  (key: 'sip-calc', title: 'SIP Calculator', subtitle: 'Plan mutual fund investments', icon: Icons.trending_up_outlined, color: Color(0xFF4CAF50)),
+  (key: 'tax-calc', title: 'Tax Calculator', subtitle: 'Calculate income tax', icon: Icons.receipt_long_outlined, color: Color(0xFF9C27B0)),
+  (key: 'gst-calc', title: 'GST Calculator', subtitle: 'Calculate GST amounts', icon: Icons.receipt_outlined, color: Color(0xFF7B1FA2)),
+  (key: 'fdrd-calc', title: 'FD/RD Calculator', subtitle: 'Fixed/Recurring deposit returns', icon: Icons.account_balance_outlined, color: Color(0xFF1565C0)),
+  (key: 'ppf-calc', title: 'PPF Calculator', subtitle: 'Public Provident Fund returns', icon: Icons.savings_outlined, color: Color(0xFF0277BD)),
+  (key: 'salary-calc', title: 'Salary Calculator', subtitle: 'CTC to In-Hand salary', icon: Icons.payments_outlined, color: Color(0xFF2E7D32)),
+  (key: 'gratuity-calc', title: 'Gratuity Calculator', subtitle: 'Calculate gratuity amount', icon: Icons.card_giftcard_outlined, color: Color(0xFF00695C)),
+  (key: 'nps-calc', title: 'NPS Calculator', subtitle: 'National Pension corpus', icon: Icons.account_balance_wallet_outlined, color: Color(0xFF0277BD)),
+  (key: 'interest-calc', title: 'Interest Calculator', subtitle: 'Simple & compound interest', icon: Icons.attach_money_outlined, color: Color(0xFFE65100)),
+  (key: 'home-loan-calc', title: 'Home Loan Affordability', subtitle: 'Max loan you can afford', icon: Icons.home_outlined, color: Color(0xFF1565C0)),
+  (key: 'retirement-calc', title: 'Retirement Calculator', subtitle: 'Plan retirement corpus', icon: Icons.beach_access_outlined, color: Color(0xFF00695C)),
+  (key: 'mutual-fund-calc', title: 'Mutual Fund Returns', subtitle: 'Calculate MF returns', icon: Icons.show_chart_outlined, color: Color(0xFF1B5E20)),
+  (key: 'stock-calc', title: 'Stock Profit/Loss', subtitle: 'Track stock returns', icon: Icons.candlestick_chart_outlined, color: Color(0xFFB71C1C)),
+  (key: 'gold-calc', title: 'Gold Price Calculator', subtitle: 'Calculate gold value', icon: Icons.diamond_outlined, color: Color(0xFFF9A825)),
+  (key: 'inflation-calc', title: 'Inflation Calculator', subtitle: 'Impact of inflation', icon: Icons.trending_up_outlined, color: Color(0xFFBF360C)),
+  (key: 'loan-eligibility-calc', title: 'Loan Eligibility', subtitle: 'Check loan eligibility', icon: Icons.verified_outlined, color: Color(0xFF0D47A1)),
+  (key: 'hra-calc', title: 'HRA Calculator', subtitle: 'HRA tax exemption', icon: Icons.house_outlined, color: Color(0xFF4527A0)),
+  (key: 'stamp-duty-calc', title: 'Stamp Duty Calculator', subtitle: 'Property stamp duty', icon: Icons.article_outlined, color: Color(0xFF4E342E)),
+  (key: 'rent-vs-buy-calc', title: 'Rent vs Buy', subtitle: 'Compare renting vs buying', icon: Icons.compare_arrows_outlined, color: Color(0xFF283593)),
+  // Math & Education
+  (key: 'percent-calc', title: 'Percentage Calculator', subtitle: 'Calculate percentages', icon: Icons.percent_outlined, color: Color(0xFF00897B)),
+  (key: 'discount-calc', title: 'Discount Calculator', subtitle: 'Calculate discounts', icon: Icons.local_offer_outlined, color: Color(0xFFC62828)),
+  (key: 'cgpa-calc', title: 'CGPA to Percentage', subtitle: 'Convert CGPA to %', icon: Icons.school_outlined, color: Color(0xFF1A237E)),
+  (key: 'marks-calc', title: 'Marks Percentage', subtitle: 'Calculate marks %', icon: Icons.grading_outlined, color: Color(0xFFBF360C)),
+  (key: '12th-calc', title: '12th Percentage', subtitle: '12th class percentage', icon: Icons.menu_book_outlined, color: Color(0xFF311B92)),
+  (key: 'jee-calc', title: 'JEE Rank Predictor', subtitle: 'Predict JEE rank', icon: Icons.emoji_events_outlined, color: Color(0xFFFF6F00)),
+  (key: 'neet-calc', title: 'NEET Score Calculator', subtitle: 'NEET score & rank', icon: Icons.medical_services_outlined, color: Color(0xFF1B5E20)),
+  (key: 'mba-roi-calc', title: 'MBA ROI Calculator', subtitle: 'MBA return on investment', icon: Icons.business_center_outlined, color: Color(0xFF880E4F)),
+  // Health & Family
+  (key: 'bmi-calc', title: 'BMI Calculator', subtitle: 'Check body mass index', icon: Icons.monitor_weight_outlined, color: Color(0xFFE91E63)),
+  (key: 'calorie-calc', title: 'Calories Calculator', subtitle: 'Daily calorie needs', icon: Icons.local_fire_department_outlined, color: Color(0xFFFF9800)),
+  (key: 'ideal-weight-calc', title: 'Ideal Weight', subtitle: 'Ideal body weight', icon: Icons.fitness_center_outlined, color: Color(0xFF00838F)),
+  (key: 'pregnancy-calc', title: 'Pregnancy Due Date', subtitle: 'Expected due date', icon: Icons.child_friendly_outlined, color: Color(0xFFEC407A)),
+  (key: 'ovulation-calc', title: 'Ovulation Calculator', subtitle: 'Fertile window tracker', icon: Icons.favorite_border_outlined, color: Color(0xFFD81B60)),
+  (key: 'baby-growth-calc', title: 'Baby Growth', subtitle: 'Track baby growth', icon: Icons.child_care_outlined, color: Color(0xFFF06292)),
+  // Utility
+  (key: 'fuel-calc', title: 'Fuel Cost Calculator', subtitle: 'Trip fuel cost', icon: Icons.local_gas_station_outlined, color: Color(0xFFE65100)),
+  (key: 'electricity-calc', title: 'Electricity Bill', subtitle: 'Calculate electricity bill', icon: Icons.bolt_outlined, color: Color(0xFFF9A825)),
+  (key: 'mileage-calc', title: 'Mileage Calculator', subtitle: 'Vehicle fuel efficiency', icon: Icons.speed_outlined, color: Color(0xFF546E7A)),
+  (key: 'solar-calc', title: 'Solar Panel Savings', subtitle: 'Solar savings estimate', icon: Icons.solar_power_outlined, color: Color(0xFFF57F17)),
+  (key: 'paint-calc', title: 'Paint Calculator', subtitle: 'Paint needed for room', icon: Icons.format_paint_outlined, color: Color(0xFFE65100)),
+  (key: 'carpet-calc', title: 'Carpet Area', subtitle: 'Carpet area from super area', icon: Icons.square_foot_outlined, color: Color(0xFF3E2723)),
+  // Date & Time
+  (key: 'age-calc', title: 'Age Calculator', subtitle: 'Calculate exact age', icon: Icons.cake_outlined, color: Color(0xFF8BC34A)),
+  (key: 'time-calc', title: 'Time Difference', subtitle: 'Time between dates', icon: Icons.schedule_outlined, color: Color(0xFF3F51B5)),
+  (key: 'working-days-calc', title: 'Working Days', subtitle: 'Working days between dates', icon: Icons.work_outlined, color: Color(0xFF455A64)),
+  (key: 'days-between-calc', title: 'Days Between Dates', subtitle: 'Days between two dates', icon: Icons.date_range_outlined, color: Color(0xFF5D4037)),
+  // Fun
+  (key: 'love-calc', title: 'Love Calculator', subtitle: 'Fun compatibility tool', icon: Icons.favorite_outline, color: Color(0xFFE91E63)),
+  (key: 'horo-calc', title: 'Horoscope', subtitle: 'Daily horoscope', icon: Icons.stars_outlined, color: Color(0xFF673AB7)),
+  // Converters
+  (key: 'unit-calc', title: 'Unit Converter', subtitle: 'Convert between units', icon: Icons.straighten_outlined, color: Color(0xFF00BCD4)),
+  (key: 'currency-calc', title: 'Currency Converter', subtitle: 'Convert currencies', icon: Icons.monetization_on_outlined, color: Color(0xFF2E7D32)),
 ];
 
 class CalculatorToolPage extends StatefulWidget {
@@ -110,9 +146,60 @@ class _CalculatorToolPageState extends State<CalculatorToolPage> {
   }
 
   Widget _buildBody() {
+    // Map calc keys to website slugs for WebView fallback
+    const keyToSlug = {
+      'emi-calc': 'emi-calculator',
+      'sip-calc': 'sip-calculator',
+      'tax-calc': 'tax-calculator',
+      'gst-calc': 'gst-calculator',
+      'fdrd-calc': 'fd-rd-calculator',
+      'bmi-calc': 'bmi-calculator',
+      'calorie-calc': 'calories-calculator',
+      'unit-calc': 'unit-converter',
+      'age-calc': 'age-calculator',
+      'time-calc': 'time-calculator',
+      'love-calc': 'love-calculator',
+      'horo-calc': 'horoscope',
+      'percent-calc': 'percentage-calculator',
+      'fuel-calc': 'fuel-cost-calculator',
+      'electricity-calc': 'electricity-bill-calculator',
+      'currency-calc': 'unit-converter',
+      'ppf-calc': 'ppf-calculator',
+      'salary-calc': 'salary-calculator',
+      'gratuity-calc': 'gratuity-calculator',
+      'nps-calc': 'nps-calculator',
+      'interest-calc': 'interest-calculator',
+      'home-loan-calc': 'home-loan-calculator',
+      'retirement-calc': 'retirement-calculator',
+      'mutual-fund-calc': 'mutual-fund-calculator',
+      'stock-calc': 'stock-calculator',
+      'gold-calc': 'gold-calculator',
+      'inflation-calc': 'inflation-calculator',
+      'loan-eligibility-calc': 'loan-eligibility',
+      'hra-calc': 'hra-calculator',
+      'stamp-duty-calc': 'stamp-duty-calculator',
+      'rent-vs-buy-calc': 'rent-vs-buy',
+      'discount-calc': 'discount-calculator',
+      'cgpa-calc': 'cgpa-percentage',
+      'marks-calc': 'marks-percentage',
+      '12th-calc': '12th-percentage',
+      'jee-calc': 'jee-rank-predictor',
+      'neet-calc': 'neet-calculator',
+      'mba-roi-calc': 'mba-roi-calculator',
+      'ideal-weight-calc': 'ideal-weight-calculator',
+      'pregnancy-calc': 'pregnancy-due-date',
+      'ovulation-calc': 'ovulation-calculator',
+      'baby-growth-calc': 'baby-growth-calculator',
+      'mileage-calc': 'mileage-calculator',
+      'solar-calc': 'solar-calculator',
+      'paint-calc': 'paint-calculator',
+      'carpet-calc': 'carpet-area-calculator',
+      'working-days-calc': 'working-days-calculator',
+      'days-between-calc': 'days-between-dates',
+    };
+
+    // Native implementations for existing calculators
     switch (widget.calcKey) {
-      case 'mortgage-calc':
-        return const _MortgageCalc();
       case 'emi-calc':
         return const _EmiCalc();
       case 'sip-calc':
@@ -125,16 +212,12 @@ class _CalculatorToolPageState extends State<CalculatorToolPage> {
         return const _CalorieCalc();
       case 'unit-calc':
         return const _UnitCalc();
-      case 'temp-calc':
-        return const _TempCalc();
       case 'age-calc':
         return const _AgeCalc();
       case 'time-calc':
         return const _TimeCalc();
       case 'love-calc':
         return const _LoveCalc();
-      case 'compat-calc':
-        return const _CompatCalc();
       case 'horo-calc':
         return const _HoroCalc();
       case 'gst-calc':
@@ -147,12 +230,20 @@ class _CalculatorToolPageState extends State<CalculatorToolPage> {
         return const _FuelCalc();
       case 'electricity-calc':
         return const _ElectricityCalc();
-      case 'material-calc':
-        return const _MaterialCalc();
       case 'currency-calc':
         return const _CurrencyCalc();
       default:
-        return const Text('Unknown calculator');
+        // Load from website via WebView for all other calculators
+        final slug = keyToSlug[widget.calcKey] ?? widget.calcKey;
+        final url = 'https://indiainformations.com/calculators/$slug';
+        return SizedBox(
+          height: MediaQuery.of(context).size.height * 0.75,
+          child: WebViewWidget(
+            controller: WebViewController()
+              ..setJavaScriptMode(JavaScriptMode.unrestricted)
+              ..loadRequest(Uri.parse(url)),
+          ),
+        );
     }
   }
 }
