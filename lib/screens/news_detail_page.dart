@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import '../services/ad_service.dart';
 import '../services/api_service.dart';
@@ -148,12 +150,14 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
     if (_data == null) return;
     
     final title = _data!['title'] ?? 'News Update';
-    final text = 'Read this on India Info Super App: $title\nDownload now to earn rewards and stay updated: https://indiainfo.app';
+    final slug = _data!['slug'] ?? widget.slug;
+    final newsUrl = 'https://indiainformations.com/news/$slug';
+    final text = '$title\n\nRead more: $newsUrl\n\nDownload India Informations App for latest news & tools!';
     
-    final result = await Share.share(text);
+    await Share.share(text, subject: title);
     
     final token = await AuthStore.readToken();
-    if (result.status == ShareResultStatus.success && token != null) {
+    if (token != null) {
       try {
         final res = await widget.api.postJson('/gamification/share', {
           'content_type': 'news',
@@ -219,6 +223,44 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
               child: AdWidget(ad: _bannerAd!),
             ),
         ],
+      ),
+      bottomNavigationBar: _buildBottomBar(),
+    );
+  }
+
+  Widget _buildBottomBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, -2))],
+      ),
+      child: SafeArea(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.home_outlined),
+              onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
+              tooltip: 'Home',
+            ),
+            IconButton(
+              icon: const Icon(Icons.share_outlined),
+              onPressed: _shareArticle,
+              tooltip: 'Share',
+            ),
+            IconButton(
+              icon: const Icon(Icons.bookmark_outline),
+              onPressed: () {},
+              tooltip: 'Save',
+            ),
+            IconButton(
+              icon: const Icon(Icons.text_increase),
+              onPressed: () {},
+              tooltip: 'Font Size',
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -289,14 +331,47 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
           ),
         ],
         const SizedBox(height: 16),
-        SelectableText(body, style: Theme.of(context).textTheme.bodyLarge),
-        if (link != null && link.isNotEmpty) ...[
+        HtmlWidget(
+          body,
+          textStyle: Theme.of(context).textTheme.bodyLarge,
+        ),
+        if (link != null && link.isNotEmpty && !link.startsWith('manual://')) ...[
           const SizedBox(height: 24),
-          Text(
-            'Source link',
-            style: Theme.of(context).textTheme.titleSmall,
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                final title = d['title'] as String? ?? 'Article';
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => Scaffold(
+                      appBar: AppBar(
+                        title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
+                        leading: IconButton(
+                          icon: const Icon(Icons.arrow_back_ios),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ),
+                      body: WebViewWidget(
+                        controller: WebViewController()
+                          ..setJavaScriptMode(JavaScriptMode.unrestricted)
+                          ..loadRequest(Uri.parse(link)),
+                      ),
+                      bottomNavigationBar: _buildBottomBar(),
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.open_in_new, size: 18),
+              label: const Text('Read Full Article'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.brandNavy,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
           ),
-          SelectableText(link),
         ],
 
         if (_related.isNotEmpty) ...[

@@ -36,7 +36,7 @@ class _FeedPageState extends State<FeedPage> {
   List<dynamic> _categories = [];
   List<dynamic> _featuredSections = [];
 
-  int _viewMode = 1;
+  int _viewMode = 0;
 
   BannerAd? _bannerAd;
   bool _isBannerLoaded = false;
@@ -305,16 +305,6 @@ class _FeedPageState extends State<FeedPage> {
         ),
         actions: [
           IconButton(
-            tooltip: _viewMode == 0 ? 'Switch to Reels' : 'Switch to List',
-            icon: Icon(_viewMode == 0 ? Icons.play_circle_outline : Icons.view_list_outlined),
-            color: AppColors.brandNavy,
-            onPressed: () {
-              setState(() {
-                _viewMode = _viewMode == 0 ? 1 : 0;
-              });
-            },
-          ),
-          IconButton(
             tooltip: 'Notifications',
             icon: const Icon(Icons.notifications_outlined),
             color: AppColors.brandNavy,
@@ -332,15 +322,13 @@ class _FeedPageState extends State<FeedPage> {
       body: Column(
         children: [
           Expanded(
-            child: _viewMode == 1
-                ? ReelsFeed(news: _featuredSections.isEmpty ? [] : _featuredSections.first['news'] as List<dynamic>? ?? [], onRefresh: _load)
-                : RefreshIndicator(
-                    color: AppColors.brandOrange,
-                    onRefresh: _load,
-                    child: _buildBody(),
-                  ),
+            child: RefreshIndicator(
+              color: AppColors.brandOrange,
+              onRefresh: _load,
+              child: _buildBody(),
+            ),
           ),
-          if (_isBannerLoaded && _bannerAd != null && _viewMode == 0)
+          if (_isBannerLoaded && _bannerAd != null)
             Container(
               color: Colors.white,
               alignment: Alignment.center,

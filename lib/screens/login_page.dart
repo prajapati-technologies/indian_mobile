@@ -263,30 +263,6 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 20),
             Row(
-              children: [
-                Expanded(child: Divider(color: Colors.grey.shade300)),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('or continue with', style: TextStyle(color: Colors.grey, fontSize: 13)),
-                ),
-                Expanded(child: Divider(color: Colors.grey.shade300)),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _SocialLoginButton(
-                  icon: Icons.g_mobiledata,
-                  color: Colors.red,
-                  onTap: _handleGoogleSignIn,
-                ),
-                // TODO: Add Facebook & Apple Sign-In before store submission
-                // Apple Sign-In is REQUIRED by App Store if offering other social logins
-              ],
-            ),
-            const SizedBox(height: 24),
-            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(

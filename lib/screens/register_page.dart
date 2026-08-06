@@ -313,29 +313,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       ],
                     ),
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(child: Divider(color: Colors.grey.shade300)),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('or continue with', style: TextStyle(color: Colors.grey, fontSize: 13)),
-                ),
-                Expanded(child: Divider(color: Colors.grey.shade300)),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _SocialLoginButton(
-                  icon: Icons.g_mobiledata,
-                  color: Colors.red,
-                  onTap: () {},
-                ),
-                // TODO: Add Apple Sign-In before App Store submission
-              ],
-            ),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

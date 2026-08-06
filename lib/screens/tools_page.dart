@@ -48,7 +48,7 @@ class _ToolsGridCard extends StatelessWidget {
           splashColor: color.withOpacity(0.1),
           highlightColor: color.withOpacity(0.05),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+            padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 10.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -69,34 +69,19 @@ class _ToolsGridCard extends StatelessWidget {
                       )
                     ],
                   ),
-                  child: Icon(icon, color: Colors.white, size: 24),
+                  child: Icon(icon, color: Colors.white, size: 22),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 Text(
                   title,
                   textAlign: TextAlign.center,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 10.5,
                     height: 1.2,
                     color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Expanded(
-                  child: Text(
-                    subtitle,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 9,
-                      height: 1.2,
-                      color: Colors.grey.shade600,
-                    ),
                   ),
                 ),
               ],
@@ -110,9 +95,9 @@ class _ToolsGridCard extends StatelessWidget {
 
 const _gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
   crossAxisCount: 3,
-  mainAxisSpacing: 12,
-  crossAxisSpacing: 12,
-  childAspectRatio: 0.8,
+  mainAxisSpacing: 10,
+  crossAxisSpacing: 10,
+  childAspectRatio: 0.95,
 );
 
 class ToolsPage extends StatefulWidget {
@@ -263,51 +248,60 @@ class _ToolsPageState extends State<ToolsPage> {
   }
 }
 
-class _CalculatorsList extends StatelessWidget {
+class _CalculatorsList extends StatefulWidget {
   const _CalculatorsList({required this.token, required this.onRequireLogin});
   final String? token;
   final VoidCallback onRequireLogin;
 
   @override
+  State<_CalculatorsList> createState() => _CalculatorsListState();
+}
+
+class _CalculatorsListState extends State<_CalculatorsList> {
+  String _searchQuery = '';
+
+  List<({String key, String title, String subtitle, IconData icon, Color color})> get _filteredItems {
+    if (_searchQuery.isEmpty) return kCalculatorMenu;
+    final q = _searchQuery.toLowerCase();
+    return kCalculatorMenu.where((e) => e.title.toLowerCase().contains(q) || e.subtitle.toLowerCase().contains(q)).toList();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final items = _filteredItems;
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Icon(Icons.calculate_outlined, color: AppColors.brandOrange, size: 32),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Calculator Tools', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: Colors.black87)),
-                    const SizedBox(height: 2),
-                    Text('All types of calculator tools in one place', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12, color: Colors.grey.shade600)),
-                  ],
-                ),
-              ),
-            ],
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          child: TextField(
+            onChanged: (v) => setState(() => _searchQuery = v),
+            decoration: InputDecoration(
+              hintText: 'Search calculators...',
+              hintStyle: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+              prefixIcon: const Icon(Icons.search, size: 20),
+              filled: true,
+              fillColor: Colors.grey.shade100,
+              contentPadding: const EdgeInsets.symmetric(vertical: 10),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+            ),
           ),
         ),
         Expanded(
           child: GridView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
             gridDelegate: _gridDelegate,
-            itemCount: kCalculatorMenu.length,
+            itemCount: items.length,
             itemBuilder: (context, index) {
-              final e = kCalculatorMenu[index];
+              final e = items[index];
               return _ToolsGridCard(
                 icon: e.icon,
                 title: e.title,
                 subtitle: e.subtitle,
                 color: e.color,
                 onTap: () {
-                  if (token == null) {
-                    onRequireLogin();
+                  if (widget.token == null) {
+                    widget.onRequireLogin();
                     return;
                   }
                   Navigator.of(context).push(
@@ -343,6 +337,17 @@ class _UtilityToolsListState extends State<_UtilityToolsList> {
   bool _loading = true;
   String? _error;
   List<dynamic> _tools = [];
+  String _searchQuery = '';
+
+  List<dynamic> get _filteredTools {
+    if (_searchQuery.isEmpty) return _tools;
+    final q = _searchQuery.toLowerCase();
+    return _tools.where((t) {
+      final title = (t as Map<String, dynamic>)['title']?.toString().toLowerCase() ?? '';
+      final key = t['key']?.toString().toLowerCase() ?? '';
+      return title.contains(q) || key.contains(q);
+    }).toList();
+  }
 
   Future<void> _load() async {
     setState(() {
@@ -403,31 +408,26 @@ class _UtilityToolsListState extends State<_UtilityToolsList> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(Icons.handyman_outlined, color: Colors.green.shade700, size: 32),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Unity Tools', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: Colors.black87)),
-                    const SizedBox(height: 2),
-                    Text('Essential utilities and helpers in one place', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12, color: Colors.grey.shade600)),
-                  ],
-                ),
-              ),
-            ],
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          child: TextField(
+            onChanged: (v) => setState(() => _searchQuery = v),
+            decoration: InputDecoration(
+              hintText: 'Search tools...',
+              hintStyle: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+              prefixIcon: const Icon(Icons.search, size: 20),
+              filled: true,
+              fillColor: Colors.grey.shade100,
+              contentPadding: const EdgeInsets.symmetric(vertical: 10),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+            ),
           ),
         ),
         Expanded(
           child: GridView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
             gridDelegate: _gridDelegate,
-            itemCount: _tools.length,
+            itemCount: _filteredTools.length,
             itemBuilder: (context, index) {
               final colors = [
                 Colors.blue.shade600,
@@ -441,7 +441,7 @@ class _UtilityToolsListState extends State<_UtilityToolsList> {
               ];
               final itemColor = colors[index % colors.length];
               
-              final row = _tools[index] as Map<String, dynamic>;
+              final row = _filteredTools[index] as Map<String, dynamic>;
               final key = row['key'] as String? ?? '';
               final title = row['title'] as String? ?? key;
               final icon = _getIconForKey(key);

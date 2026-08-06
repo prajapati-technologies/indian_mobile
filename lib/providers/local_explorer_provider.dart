@@ -8,9 +8,11 @@ import '../config/app_config.dart';
 import '../models/place_model.dart';
 import '../services/city_explorer_api_service.dart';
 import '../services/location_service.dart';
+import '../services/overpass_service.dart';
 
 class LocalExplorerProvider extends ChangeNotifier {
   final LocationService _locationService = LocationService();
+  final OverpassService _overpassService = OverpassService();
   late final CityExplorerApiService _apiService;
 
   LocalExplorerProvider() {
@@ -62,6 +64,9 @@ class LocalExplorerProvider extends ChangeNotifier {
     if (currentCity != null) {
       return '${currentCity!.city}, ${currentCity!.state}';
     }
+    if (!cityFoundOnBackend && availableCities.isNotEmpty) {
+      return 'Select a City';
+    }
     return 'Detecting...';
   }
 
@@ -102,7 +107,12 @@ class LocalExplorerProvider extends ChangeNotifier {
       await loadFavorites();
       await loadRecentSearches();
     } catch (e) {
-      errorMessage = e.toString();
+      // Location failed (simulator or permission denied) — show city picker
+      errorMessage = null;
+      cityFoundOnBackend = false;
+      await loadAvailableCities();
+      await loadFavorites();
+      await loadRecentSearches();
     }
 
     isLocationLoading = false;
@@ -186,48 +196,75 @@ class LocalExplorerProvider extends ChangeNotifier {
   // ─── Places by Category ────────────────────────────────────────────────────
 
   /// Load places for a category from the backend API.
-  /// This replaces the old Overpass-based searchNearby.
+  /// Load places for a category — tries backend first, falls back to Overpass (nearby GPS).
   Future<void> searchNearby(String category) async {
-    if (_currentCitySlug == null) return;
-
     isLoading = true;
     selectedCategory = category;
     errorMessage = null;
     notifyListeners();
 
     try {
-      // Convert category key to slug format the backend expects
-      final categorySlug = _toSlug(category);
-      final response = await _apiService.getPlaces(_currentCitySlug!, categorySlug);
-      final data = response['data'] as Map<String, dynamic>? ?? {};
+      // Try backend API first (if city is known)
+      if (_currentCitySlug != null) {
+        final categorySlug = _toSlug(category);
+        final response = await _apiService.getPlaces(_currentCitySlug!, categorySlug);
+        final data = response['data'] as Map<String, dynamic>? ?? {};
 
-      // Combine sponsored + featured + normal into a single list
-      final places = <PlaceModel>[];
+        final places = <PlaceModel>[];
 
-      final sponsored = data['sponsored'] as List<dynamic>? ?? [];
-      for (final item in sponsored) {
-        places.add(_placeFromApiListing(item as Map<String, dynamic>, isSponsored: true));
+        final sponsored = data['sponsored'] as List<dynamic>? ?? [];
+        for (final item in sponsored) {
+          places.add(_placeFromApiListing(item as Map<String, dynamic>, isSponsored: true));
+        }
+
+        final featured = data['featured'] as List<dynamic>? ?? [];
+        for (final item in featured) {
+          places.add(_placeFromApiListing(item as Map<String, dynamic>, isFeatured: true));
+        }
+
+        final normal = data['normal'] as Map<String, dynamic>? ?? {};
+        final normalData = normal['data'] as List<dynamic>? ?? [];
+        for (final item in normalData) {
+          places.add(_placeFromApiListing(item as Map<String, dynamic>));
+        }
+
+        if (places.isNotEmpty) {
+          nearbyPlaces = places;
+          _markFavorites(nearbyPlaces);
+          isLoading = false;
+          notifyListeners();
+          return;
+        }
       }
 
-      final featured = data['featured'] as List<dynamic>? ?? [];
-      for (final item in featured) {
-        places.add(_placeFromApiListing(item as Map<String, dynamic>, isFeatured: true));
-      }
-
-      // Normal places come as paginated data
-      final normal = data['normal'] as Map<String, dynamic>? ?? {};
-      final normalData = normal['data'] as List<dynamic>? ?? [];
-      for (final item in normalData) {
-        places.add(_placeFromApiListing(item as Map<String, dynamic>));
-      }
-
-      nearbyPlaces = places;
-      _markFavorites(nearbyPlaces);
-    } catch (e) {
-      if (e is CityExplorerApiException && e.isNotFound) {
-        nearbyPlaces = [];
+      // Fallback: Use Overpass (OpenStreetMap) for nearby GPS-based results
+      if (currentPosition != null) {
+        nearbyPlaces = await _overpassService.searchNearby(
+          currentPosition!.latitude,
+          currentPosition!.longitude,
+          category,
+        );
+        _markFavorites(nearbyPlaces);
       } else {
-        errorMessage = 'Failed to load places: ${_friendlyError(e)}';
+        nearbyPlaces = [];
+      }
+    } catch (e) {
+      // Final fallback — try Overpass if backend failed
+      if (currentPosition != null) {
+        try {
+          nearbyPlaces = await _overpassService.searchNearby(
+            currentPosition!.latitude,
+            currentPosition!.longitude,
+            category,
+          );
+          _markFavorites(nearbyPlaces);
+        } catch (_) {
+          nearbyPlaces = [];
+          errorMessage = 'Could not find nearby places. Check your connection.';
+        }
+      } else {
+        nearbyPlaces = [];
+        errorMessage = 'Location not available. Please enable GPS.';
       }
     }
 

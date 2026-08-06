@@ -56,7 +56,7 @@ class OverpassService {
     double lat,
     double lng,
     String category, {
-    int radius = 2000,
+    int radius = 15000,
     int limit = 30,
   }) async {
     final tags = category == 'all' ? _allCategories : [category];

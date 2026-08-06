@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../services/ad_service.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 
@@ -53,6 +55,37 @@ class _DailyRewardPageState extends State<DailyRewardPage> {
       _isLoading = true;
     });
 
+    // Show rewarded video ad first — reward only after ad completes
+    RewardedAd.load(
+      adUnitId: AdService.rewardedAdUnitId,
+      request: const AdRequest(),
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        onAdLoaded: (RewardedAd ad) {
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {
+              ad.dispose();
+              // Ad watched — now claim reward from backend
+              _actuallyClaimReward();
+            },
+            onAdFailedToShowFullScreenContent: (ad, error) {
+              ad.dispose();
+              // Ad failed to show — still allow claim (don't punish user)
+              _actuallyClaimReward();
+            },
+          );
+          ad.show(onUserEarnedReward: (ad, reward) {
+            // User earned the reward by watching full ad
+          });
+        },
+        onAdFailedToLoad: (LoadAdError error) {
+          // Ad not available — allow claim anyway (network issue etc)
+          _actuallyClaimReward();
+        },
+      ),
+    );
+  }
+
+  Future<void> _actuallyClaimReward() async {
     try {
       final res = await widget.api.postJson(
         '/rewards/daily',
