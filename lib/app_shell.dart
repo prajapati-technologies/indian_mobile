@@ -5,6 +5,7 @@ import 'screens/account_page.dart';
 import 'screens/feed_page.dart';
 import 'screens/tools_page.dart';
 import 'screens/local_explorer/local_explorer_screen.dart';
+import 'screens/jobs/job_hub_page.dart';
 import 'services/api_service.dart';
 import 'services/auth_store.dart';
 import 'services/api_url_store.dart';
@@ -156,6 +157,7 @@ class _AppShellState extends State<AppShell> {
           ),
           ToolsPage(api: api, token: _token, onRequireLogin: _requireLogin),
           BusinessDirectoryPage(api: api, token: _token, onRequireLogin: _requireLogin),
+          JobHubPage(api: api),
           const LocalExplorerScreen(),
         ],
       ),
@@ -213,6 +215,11 @@ class _AppShellState extends State<AppShell> {
                     icon: Icon(Icons.storefront_rounded, size: 26),
                     selectedIcon: Icon(Icons.storefront_rounded, size: 28),
                     label: 'Directory',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.work_rounded, size: 26),
+                    selectedIcon: Icon(Icons.work_rounded, size: 28),
+                    label: 'Jobs',
                   ),
                   NavigationDestination(
                     icon: Icon(Icons.explore_rounded, size: 26),

@@ -9,6 +9,7 @@ import '../widgets/news_feed_card.dart';
 import '../widgets/reels_feed.dart';
 import 'category_news_page.dart';
 import 'news_detail_page.dart';
+import 'jobs/job_list_page.dart';
 
 class FeedPage extends StatefulWidget {
   const FeedPage({
@@ -586,8 +587,17 @@ class _FeedPageState extends State<FeedPage> {
 
         if (_featuredSections.isNotEmpty)
           SliverToBoxAdapter(
-            child: SizedBox(height: MediaQuery.paddingOf(context).bottom + 28),
+            child: SizedBox(height: 12),
           ),
+
+        // 4. Latest Jobs Section on Home
+        SliverToBoxAdapter(
+          child: _LatestJobsHomeSection(api: widget.api),
+        ),
+
+        SliverToBoxAdapter(
+          child: SizedBox(height: MediaQuery.paddingOf(context).bottom + 28),
+        ),
       ],
     );
   }
@@ -694,5 +704,177 @@ class _LatestMiniCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _LatestJobsHomeSection extends StatefulWidget {
+  const _LatestJobsHomeSection({required this.api});
+  final ApiService api;
+
+  @override
+  State<_LatestJobsHomeSection> createState() => _LatestJobsHomeSectionState();
+}
+
+class _LatestJobsHomeSectionState extends State<_LatestJobsHomeSection> {
+  List<dynamic> _jobs = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadJobs();
+  }
+
+  Future<void> _loadJobs() async {
+    try {
+      final result = await widget.api.getJson('/job-posts/latest');
+      final data = result as Map<String, dynamic>;
+      if (mounted) {
+        setState(() {
+          _jobs = (data['data'] as List<dynamic>?) ?? [];
+          _loading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading || _jobs.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+          child: Row(
+            children: [
+              const Icon(Icons.work_rounded, size: 22, color: AppColors.brandNavy),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Latest Jobs & Results',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(
+                    builder: (_) => JobListPage(api: widget.api, type: 'job', title: 'Latest Job'),
+                  ));
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.brandOrange,
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('View All', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                    SizedBox(width: 2),
+                    Icon(Icons.chevron_right, size: 16),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        ..._jobs.take(5).map((job) {
+          final j = job as Map<String, dynamic>;
+          final title = j['title'] as String? ?? '';
+          final org = j['organization_name'] as String? ?? '';
+          final type = j['type'] as String? ?? 'job';
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Card(
+              elevation: 0.5,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: () {
+                  final slug = j['slug'] as String? ?? '';
+                  if (slug.isNotEmpty) {
+                    Navigator.push(context, MaterialPageRoute(
+                      builder: (_) => JobListPage(api: widget.api, type: type, title: _typeLabel(type)),
+                    ));
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40, height: 40,
+                        decoration: BoxDecoration(
+                          color: _typeColor(type).withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(_typeIcon(type), size: 20, color: _typeColor(type)),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.brandNavy)),
+                            if (org.isNotEmpty) ...[
+                              const SizedBox(height: 2),
+                              Text(org, style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+                            ],
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: _typeColor(type).withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(_typeLabel(type), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: _typeColor(type))),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  String _typeLabel(String type) {
+    switch (type) {
+      case 'admit_card': return 'Admit Card';
+      case 'result': return 'Result';
+      case 'admission': return 'Admission';
+      default: return 'Job';
+    }
+  }
+
+  Color _typeColor(String type) {
+    switch (type) {
+      case 'admit_card': return const Color(0xFF138808);
+      case 'result': return const Color(0xFFFF9933);
+      case 'admission': return const Color(0xFF6A1B9A);
+      default: return AppColors.brandNavy;
+    }
+  }
+
+  IconData _typeIcon(String type) {
+    switch (type) {
+      case 'admit_card': return Icons.badge_rounded;
+      case 'result': return Icons.poll_rounded;
+      case 'admission': return Icons.school_rounded;
+      default: return Icons.work_rounded;
+    }
   }
 }
