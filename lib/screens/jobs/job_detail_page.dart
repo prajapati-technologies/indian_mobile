@@ -40,31 +40,60 @@ class _JobDetailPageState extends State<JobDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final title = _post?['title'] as String? ?? '';
+
     return Scaffold(
+      backgroundColor: AppColors.pageBackground,
       appBar: AppBar(
-        title: Text(_post?['title'] ?? 'Details', maxLines: 1, overflow: TextOverflow.ellipsis),
-        backgroundColor: AppColors.brandNavy,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: AppColors.brandNavy,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        title: Text(
+          title.isNotEmpty ? title : 'Post Details',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+        ),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator(color: AppColors.brandNavy))
           : _error != null
-              ? Center(child: Text(_error!))
+              ? _buildError()
               : _post == null
                   ? const Center(child: Text('Not found'))
                   : RefreshIndicator(
                       onRefresh: _load,
-                      child: SingleChildScrollView(
-                        physics: const AlwaysScrollableScrollPhysics(),
+                      color: AppColors.brandOrange,
+                      child: ListView(
                         padding: const EdgeInsets.all(16),
-                        child: _buildContent(),
+                        children: _buildSections(),
                       ),
                     ),
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildError() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline_rounded, size: 48, color: AppColors.textMuted.withValues(alpha: 0.5)),
+            const SizedBox(height: 16),
+            Text('Failed to load', style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+            const SizedBox(height: 8),
+            Text(_error!, textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+            const SizedBox(height: 20),
+            FilledButton.icon(onPressed: _load, icon: const Icon(Icons.refresh_rounded, size: 18), label: const Text('Retry')),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildSections() {
     final post = _post!;
     final dates = (post['dates'] as List<dynamic>?) ?? [];
     final vacancies = (post['vacancies'] as List<dynamic>?) ?? [];
@@ -73,218 +102,306 @@ class _JobDetailPageState extends State<JobDetailPage> {
     final selectionModes = (post['selection_modes'] as List<dynamic>?) ?? [];
     final zoneResults = (post['zone_results'] as List<dynamic>?) ?? [];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Title
-        Text(
-          post['title'] ?? '',
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.brandNavy),
-        ),
-        const SizedBox(height: 12),
-
-        // Short Info
-        if (post['short_information'] != null && (post['short_information'] as String).isNotEmpty) ...[
-          _sectionCard('Short Information', Icons.info_rounded, [
-            Text(post['short_information'], style: const TextStyle(fontSize: 13, height: 1.5)),
-          ]),
-          const SizedBox(height: 12),
-        ],
-
-        // Important Dates
-        if (dates.isNotEmpty) ...[
-          _sectionCard('Important Dates', Icons.calendar_month_rounded, [
-            ...dates.map((d) => _tableRow(d['label'] ?? '', d['value'] ?? '')),
-          ]),
-          const SizedBox(height: 12),
-        ],
-
-        // Application Fee
-        if (post['fee_general'] != null || post['fee_sc_st'] != null) ...[
-          _sectionCard('Application Fee', Icons.currency_rupee_rounded, [
-            if (post['fee_general'] != null) _tableRow('General / OBC', post['fee_general']),
-            if (post['fee_sc_st'] != null) _tableRow('SC / ST / PH', post['fee_sc_st']),
-            if (post['fee_refund_general'] != null) _tableRow('Refund (General)', post['fee_refund_general']),
-            if (post['fee_refund_sc_st'] != null) _tableRow('Refund (SC/ST)', post['fee_refund_sc_st']),
-            if (post['fee_payment_mode'] != null) _tableRow('Payment Mode', post['fee_payment_mode']),
-          ]),
-          const SizedBox(height: 12),
-        ],
-
-        // Age Limit
-        if (post['age_minimum'] != null || post['age_maximum'] != null) ...[
-          _sectionCard('Age Limit', Icons.person_rounded, [
-            if (post['age_minimum'] != null) _tableRow('Minimum Age', post['age_minimum']),
-            if (post['age_maximum'] != null) _tableRow('Maximum Age', post['age_maximum']),
-            if (post['age_relaxation'] != null) _tableRow('Relaxation', post['age_relaxation']),
-          ]),
-          const SizedBox(height: 12),
-        ],
-
-        // Vacancy Details
-        if (vacancies.isNotEmpty) ...[
-          _sectionCard('Vacancy Details', Icons.people_rounded, [
-            ...vacancies.map((v) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                children: [
-                  Expanded(child: Text(v['post_name'] ?? '', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600))),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(color: AppColors.brandNavy.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
-                    child: Text('${v['no_of_posts'] ?? 0}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.brandNavy)),
-                  ),
-                ],
-              ),
-            )),
-          ]),
-          const SizedBox(height: 12),
-        ],
-
-        // Eligibility
-        if (post['eligibility'] != null && (post['eligibility'] as String).isNotEmpty) ...[
-          _sectionCard('Eligibility', Icons.school_rounded, [
-            Text(post['eligibility'], style: const TextStyle(fontSize: 13, height: 1.5)),
-          ]),
-          const SizedBox(height: 12),
-        ],
-
-        // Selection Mode
-        if (selectionModes.isNotEmpty) ...[
-          _sectionCard('Mode of Selection', Icons.format_list_numbered_rounded, [
-            ...selectionModes.asMap().entries.map((e) => Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Row(
-                children: [
-                  CircleAvatar(radius: 12, backgroundColor: AppColors.brandNavy.withValues(alpha: 0.1), child: Text('${e.key + 1}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.brandNavy))),
-                  const SizedBox(width: 10),
-                  Expanded(child: Text(e.value['step_name'] ?? '', style: const TextStyle(fontSize: 13))),
-                ],
-              ),
-            )),
-          ]),
-          const SizedBox(height: 12),
-        ],
-
-        // Zone Results
-        if (zoneResults.isNotEmpty) ...[
-          _sectionCard('Zone Wise Result/Cutoff', Icons.map_rounded, [
-            ...zoneResults.map((z) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                children: [
-                  Expanded(child: Text(z['zone_name'] ?? '', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600))),
-                  if (z['result_link'] != null && (z['result_link'] as String).isNotEmpty)
-                    _linkButton('Result', z['result_link']),
-                  const SizedBox(width: 6),
-                  if (z['cutoff_link'] != null && (z['cutoff_link'] as String).isNotEmpty)
-                    _linkButton('Cutoff', z['cutoff_link']),
-                ],
-              ),
-            )),
-          ]),
-          const SizedBox(height: 12),
-        ],
-
-        // How to Apply
-        if (post['how_to_apply'] != null && (post['how_to_apply'] as String).isNotEmpty) ...[
-          _sectionCard('How to Apply', Icons.edit_note_rounded, [
-            Text(post['how_to_apply'], style: const TextStyle(fontSize: 13, height: 1.5)),
-          ]),
-          const SizedBox(height: 12),
-        ],
-
-        // Important Links
-        if (links.isNotEmpty) ...[
-          _sectionCard('Important Links', Icons.link_rounded, [
-            ...links.map((l) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: InkWell(
-                onTap: () => _openUrl(l['url'] ?? ''),
-                child: Row(
-                  children: [
-                    const Icon(Icons.open_in_new_rounded, size: 16, color: AppColors.brandNavy),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(l['title'] ?? '', style: const TextStyle(fontSize: 13, color: AppColors.brandNavy, fontWeight: FontWeight.w600, decoration: TextDecoration.underline))),
-                  ],
-                ),
-              ),
-            )),
-          ]),
-          const SizedBox(height: 12),
-        ],
-
-        // FAQ
-        if (faqs.isNotEmpty) ...[
-          _sectionCard('FAQ', Icons.help_outline_rounded, [
-            ...faqs.map((f) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Q: ${f['question'] ?? ''}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 4),
-                  Text('A: ${f['answer'] ?? ''}', style: TextStyle(fontSize: 13, color: Colors.grey[700], height: 1.4)),
-                ],
-              ),
-            )),
-          ]),
-        ],
-      ],
-    );
-  }
-
-  Widget _sectionCard(String title, IconData icon, List<Widget> children) {
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
+    return [
+      // Title Card
+      _card(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            Text(
+              post['title'] ?? '',
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.brandNavy, height: 1.3),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
               children: [
-                Icon(icon, size: 20, color: AppColors.brandNavy),
-                const SizedBox(width: 8),
-                Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.brandNavy)),
+                if (post['organization_name'] != null)
+                  _infoBadge(Icons.business_rounded, post['organization_name'], AppColors.brandNavy),
+                if (post['total_posts'] != null)
+                  _infoBadge(Icons.people_rounded, '${post['total_posts']} Posts', AppColors.indiaGreen),
+                if (post['advt_no'] != null)
+                  _infoBadge(Icons.tag_rounded, post['advt_no'], AppColors.textMuted),
               ],
             ),
-            const Divider(height: 20),
-            ...children,
           ],
         ),
+      ),
+
+      // Short Information
+      if (post['short_information'] != null && (post['short_information'] as String).isNotEmpty)
+        _section('Short Information', Icons.info_outline_rounded, [
+          Text(post['short_information'], style: const TextStyle(fontSize: 13, height: 1.6, color: AppColors.textPrimary)),
+        ]),
+
+      // Important Dates
+      if (dates.isNotEmpty)
+        _section('Important Dates', Icons.calendar_month_rounded, [
+          ...dates.map((d) => _dataRow(d['label'] ?? '', d['value'] ?? '')),
+        ]),
+
+      // Application Fee
+      if (post['fee_general'] != null || post['fee_sc_st'] != null)
+        _section('Application Fee', Icons.currency_rupee_rounded, [
+          if (post['fee_general'] != null) _dataRow('General / OBC', post['fee_general']),
+          if (post['fee_sc_st'] != null) _dataRow('SC / ST / PH', post['fee_sc_st']),
+          if (post['fee_refund_general'] != null) _dataRow('Refund (General)', post['fee_refund_general']),
+          if (post['fee_refund_sc_st'] != null) _dataRow('Refund (SC/ST)', post['fee_refund_sc_st']),
+          if (post['fee_payment_mode'] != null) _dataRow('Payment Mode', post['fee_payment_mode']),
+        ]),
+
+      // Age Limit
+      if (post['age_minimum'] != null || post['age_maximum'] != null)
+        _section('Age Limit', Icons.person_rounded, [
+          if (post['age_minimum'] != null) _dataRow('Minimum Age', post['age_minimum']),
+          if (post['age_maximum'] != null) _dataRow('Maximum Age', post['age_maximum']),
+          if (post['age_relaxation'] != null) _dataRow('Age Relaxation', post['age_relaxation']),
+        ]),
+
+      // Vacancy Details
+      if (vacancies.isNotEmpty)
+        _section('Vacancy Details', Icons.people_alt_rounded, [
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.borderLight),
+            ),
+            child: Column(
+              children: [
+                // Table Header
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.brandNavy.withValues(alpha: 0.05),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                  ),
+                  child: const Row(
+                    children: [
+                      Expanded(flex: 3, child: Text('Post Name', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.brandNavy))),
+                      SizedBox(width: 50, child: Text('Posts', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.brandNavy))),
+                    ],
+                  ),
+                ),
+                ...vacancies.map((v) => Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(border: Border(top: BorderSide(color: AppColors.borderLight))),
+                  child: Row(
+                    children: [
+                      Expanded(flex: 3, child: Text(v['post_name'] ?? '', style: const TextStyle(fontSize: 12, height: 1.3))),
+                      SizedBox(
+                        width: 50,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(color: AppColors.indiaGreen.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4)),
+                          child: Text('${v['no_of_posts'] ?? 0}', textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.indiaGreen)),
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+              ],
+            ),
+          ),
+        ]),
+
+      // Eligibility
+      if (post['eligibility'] != null && (post['eligibility'] as String).isNotEmpty)
+        _section('Eligibility', Icons.school_rounded, [
+          Text(post['eligibility'], style: const TextStyle(fontSize: 13, height: 1.6)),
+        ]),
+
+      // Mode of Selection
+      if (selectionModes.isNotEmpty)
+        _section('Mode of Selection', Icons.format_list_numbered_rounded, [
+          ...selectionModes.asMap().entries.map((e) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                Container(
+                  width: 24, height: 24,
+                  decoration: BoxDecoration(
+                    color: AppColors.brandNavy.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Center(child: Text('${e.key + 1}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.brandNavy))),
+                ),
+                const SizedBox(width: 10),
+                Expanded(child: Text(e.value['step_name'] ?? '', style: const TextStyle(fontSize: 13))),
+              ],
+            ),
+          )),
+        ]),
+
+      // Zone Results
+      if (zoneResults.isNotEmpty)
+        _section('Zone Wise Result / Cutoff', Icons.map_rounded, [
+          ...zoneResults.map((z) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                Expanded(child: Text(z['zone_name'] ?? '', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600))),
+                if (z['result_link'] != null && (z['result_link'] as String).isNotEmpty)
+                  _actionChip('Result', z['result_link'], AppColors.brandNavy),
+                const SizedBox(width: 6),
+                if (z['cutoff_link'] != null && (z['cutoff_link'] as String).isNotEmpty)
+                  _actionChip('Cutoff', z['cutoff_link'], AppColors.indiaGreen),
+              ],
+            ),
+          )),
+        ]),
+
+      // How to Apply
+      if (post['how_to_apply'] != null && (post['how_to_apply'] as String).isNotEmpty)
+        _section('How to Apply', Icons.edit_note_rounded, [
+          Text(post['how_to_apply'], style: const TextStyle(fontSize: 13, height: 1.6)),
+        ]),
+
+      // Important Links
+      if (links.isNotEmpty)
+        _section('Important Links', Icons.link_rounded, [
+          ...links.map((l) => Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            decoration: BoxDecoration(
+              color: AppColors.brandNavy.withValues(alpha: 0.03),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.borderLight),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: () => _openUrl(l['url'] ?? ''),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  child: Row(
+                    children: [
+                      Icon(Icons.open_in_new_rounded, size: 16, color: AppColors.brandNavy),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(l['title'] ?? '', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.brandNavy)),
+                      ),
+                      const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          )),
+        ]),
+
+      // FAQ
+      if (faqs.isNotEmpty)
+        _section('Frequently Asked Questions', Icons.help_outline_rounded, [
+          ...faqs.asMap().entries.map((e) => _FaqTile(index: e.key, question: e.value['question'] ?? '', answer: e.value['answer'] ?? '')),
+        ]),
+
+      const SizedBox(height: 20),
+    ];
+  }
+
+  // ─── Helper Widgets ───
+
+  Widget _card({required Widget child}) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.borderLight),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 6, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  Widget _section(String title, IconData icon, List<Widget> children) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.borderLight),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 6, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppColors.brandNavy.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, size: 16, color: AppColors.brandNavy),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.brandNavy)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          ...children,
+        ],
       ),
     );
   }
 
-  Widget _tableRow(String label, String value) {
+  Widget _dataRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 140,
-            child: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black87)),
+            width: 130,
+            child: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
           ),
-          const Text(' : ', style: TextStyle(fontSize: 12)),
-          Expanded(child: Text(value, style: TextStyle(fontSize: 12, color: Colors.grey[700]))),
+          const Text(' :  ', style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+          Expanded(child: Text(value, style: TextStyle(fontSize: 12, color: AppColors.textMuted, height: 1.3))),
         ],
       ),
     );
   }
 
-  Widget _linkButton(String label, String url) {
+  Widget _infoBadge(IconData icon, String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.15)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(text, style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+
+  Widget _actionChip(String label, String url, Color color) {
     return InkWell(
       onTap: () => _openUrl(url),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: AppColors.brandNavy.withValues(alpha: 0.1),
+          color: color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.brandNavy)),
+        child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
       ),
     );
   }
@@ -292,7 +409,68 @@ class _JobDetailPageState extends State<JobDetailPage> {
   Future<void> _openUrl(String url) async {
     final uri = Uri.tryParse(url);
     if (uri != null && await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      await launchUrl(uri, mode: LaunchMode.inAppBrowserView);
     }
+  }
+}
+
+class _FaqTile extends StatefulWidget {
+  const _FaqTile({required this.index, required this.question, required this.answer});
+  final int index;
+  final String question;
+  final String answer;
+
+  @override
+  State<_FaqTile> createState() => _FaqTileState();
+}
+
+class _FaqTileState extends State<_FaqTile> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: AppColors.pageBackground,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: _expanded ? AppColors.brandNavy.withValues(alpha: 0.2) : Colors.transparent),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(10),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: () => setState(() => _expanded = !_expanded),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Q${widget.index + 1}. ', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.brandNavy)),
+                    Expanded(child: Text(widget.question, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary))),
+                    Icon(
+                      _expanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                      size: 20,
+                      color: AppColors.brandNavy,
+                    ),
+                  ],
+                ),
+                if (_expanded) ...[
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 24),
+                    child: Text(widget.answer, style: TextStyle(fontSize: 12, color: AppColors.textMuted, height: 1.5)),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
