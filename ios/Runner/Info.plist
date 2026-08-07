@@ -34,6 +34,8 @@
 	<string>Your location is used to find nearby places, hospitals, restaurants, and points of interest around you.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Your location is used to find nearby places and points of interest around you.</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>This identifier will be used to deliver personalized ads to you. You can choose to allow or deny tracking.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

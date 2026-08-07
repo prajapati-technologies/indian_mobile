@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 
 import 'package:indian_mobile/app_shell.dart';
 import 'package:indian_mobile/theme/app_theme.dart';
@@ -20,8 +21,25 @@ void main() async {
   );
 }
 
-class IndianInfoApp extends StatelessWidget {
+class IndianInfoApp extends StatefulWidget {
   const IndianInfoApp({super.key});
+
+  @override
+  State<IndianInfoApp> createState() => _IndianInfoAppState();
+}
+
+class _IndianInfoAppState extends State<IndianInfoApp> {
+  @override
+  void initState() {
+    super.initState();
+    _requestTrackingPermission();
+  }
+
+  Future<void> _requestTrackingPermission() async {
+    // Wait for app to be fully loaded before showing ATT dialog
+    await Future.delayed(const Duration(seconds: 1));
+    await AppTrackingTransparency.requestTrackingAuthorization();
+  }
 
   @override
   Widget build(BuildContext context) {
