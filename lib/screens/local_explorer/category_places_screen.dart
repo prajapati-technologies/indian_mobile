@@ -5,7 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:glass_kit/glass_kit.dart';
+import '../../widgets/frosted_container.dart';
 import '../../providers/local_explorer_provider.dart';
 import '../../models/place_model.dart';
 import '../../theme/app_theme.dart';
@@ -125,6 +125,48 @@ class _CategoryPlacesScreenState extends State<CategoryPlacesScreen> {
       );
     }
 
+    // Empty state — no places found or location not available
+    if (!provider.isLoading && places.isEmpty) {
+      return ListView(
+        padding: const EdgeInsets.fromLTRB(24, 120, 24, 24),
+        children: [
+          Icon(_categoryIcon(widget.category), size: 56, color: _categoryColor(widget.category).withValues(alpha: 0.3)),
+          const SizedBox(height: 16),
+          Text(
+            provider.errorMessage ?? 'No ${widget.category} found nearby',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            provider.currentPosition == null
+                ? 'Please enable location services to find places near you.'
+                : 'Try a different area or check back later.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 13, color: AppColors.textMuted, height: 1.5),
+          ),
+          if (provider.currentPosition == null) ...[
+            const SizedBox(height: 20),
+            FilledButton.icon(
+              onPressed: () async {
+                await provider.initializeLocation();
+                if (mounted) _loadPlaces();
+              },
+              icon: const Icon(Icons.location_on_rounded, size: 18),
+              label: const Text('Enable Location'),
+            ),
+          ] else ...[
+            const SizedBox(height: 20),
+            OutlinedButton.icon(
+              onPressed: _loadPlaces,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text('Retry'),
+            ),
+          ],
+        ],
+      );
+    }
+
     return RefreshIndicator(
       onRefresh: () async => _loadPlaces(),
       child: ListView.builder(
@@ -149,11 +191,10 @@ class _CategoryPlacesScreenState extends State<CategoryPlacesScreen> {
       onTap: () => Navigator.push(context, MaterialPageRoute(
         builder: (_) => PlaceDetailScreen(place: place),
       )),
-      child: GlassContainer.clearGlass(
+      child: FrostedContainer(
         margin: const EdgeInsets.only(bottom: 16),
         borderRadius: BorderRadius.circular(20),
         borderWidth: 0.5,
-        borderColor: Colors.white.withValues(alpha: 0.3),
         child: Column(
           children: [
             ClipRRect(

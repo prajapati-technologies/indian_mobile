@@ -4,7 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:glass_kit/glass_kit.dart';
+import '../../widgets/frosted_container.dart';
 import '../../providers/local_explorer_provider.dart';
 import '../../models/place_model.dart';
 import 'place_detail_screen.dart';
@@ -111,11 +111,10 @@ class _NearbyScreenState extends State<NearbyScreen> {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: GlassContainer.clearGlass(
+                      child: FrostedContainer(
                         height: 48,
                         borderRadius: BorderRadius.circular(16),
                         borderWidth: 0.5,
-                        borderColor: Colors.white.withValues(alpha: 0.3),
                         child: TextField(
                           decoration: InputDecoration(
                             hintText: 'Search nearby...',

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../services/api_service.dart';
+import '../services/app_review_service.dart';
 import '../theme/app_theme.dart';
 import 'daily_reward_page.dart';
 import 'edit_profile_page.dart';
@@ -294,118 +295,115 @@ class _AccountPageState extends State<AccountPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _profileCard(context, _payload!),
-        const SizedBox(height: 24),
-        _linkTile(
-          context,
-          icon: Icons.person_outline,
-          label: 'My Profile',
-          onTap: () async {
-            if (_payload == null) return;
-            final didUpdate = await Navigator.of(context).push<bool>(
-              MaterialPageRoute(
-                builder: (ctx) => EditProfilePage(
-                  api: widget.api,
-                  token: t,
-                  initialUser: _payload!['user'] ?? {},
-                ),
-              ),
-            );
-            if (didUpdate == true) {
-              _loadMe();
-            }
-          },
+        const SizedBox(height: 20),
+        // 2x2 Grid Menu
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: 1.7,
+          children: [
+            _gridTile(
+              icon: Icons.person_rounded,
+              label: 'My Profile',
+              color: const Color(0xFF0B2C5F),
+              onTap: () async {
+                if (_payload == null) return;
+                final didUpdate = await Navigator.of(context).push<bool>(
+                  MaterialPageRoute(
+                    builder: (ctx) => EditProfilePage(
+                      api: widget.api,
+                      token: t,
+                      initialUser: _payload!['user'] ?? {},
+                    ),
+                  ),
+                );
+                if (didUpdate == true) _loadMe();
+              },
+            ),
+            _gridTile(
+              icon: Icons.account_balance_wallet_rounded,
+              label: 'Earnings',
+              color: const Color(0xFF138808),
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(
+                  builder: (_) => EarningsPage(api: widget.api, token: t),
+                )).then((_) => _loadMe());
+              },
+            ),
+            _gridTile(
+              icon: Icons.card_giftcard_rounded,
+              label: 'Daily Rewards',
+              color: const Color(0xFFE65100),
+              onTap: () async {
+                if (_payload == null) return;
+                final resultCoins = await Navigator.of(context).push<int>(
+                  MaterialPageRoute(
+                    builder: (ctx) => DailyRewardPage(
+                      api: widget.api,
+                      token: t,
+                      initialRewardsData: _payload!['rewards'] ?? {},
+                      initialCoins: _payload!['user']?['coin_balance'] ?? 0,
+                    ),
+                  ),
+                );
+                if (resultCoins != null) _loadMe();
+              },
+            ),
+            _gridTile(
+              icon: Icons.casino_rounded,
+              label: 'Daily Spin',
+              color: const Color(0xFF6A1B9A),
+              onTap: () async {
+                if (_payload == null) return;
+                final resultCoins = await Navigator.of(context).push<int>(
+                  MaterialPageRoute(
+                    builder: (ctx) => SpinWheelPage(
+                      api: widget.api,
+                      token: t,
+                      initialCoins: _payload!['user']?['coin_balance'] ?? 0,
+                      initialRemainingSpins: _payload!['spin']?['remaining_spins'] ?? 0,
+                      initialBonusSpins: _payload!['spin']?['bonus_spins'] ?? 0,
+                    ),
+                  ),
+                );
+                if (resultCoins != null) _loadMe();
+              },
+            ),
+            _gridTile(
+              icon: Icons.leaderboard_rounded,
+              label: 'Leaderboard',
+              color: const Color(0xFFE91E63),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (context) => LeaderboardPage(api: widget.api, token: t)),
+                );
+              },
+            ),
+            _gridTile(
+              icon: Icons.support_agent_rounded,
+              label: 'Support',
+              color: const Color(0xFF00838F),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const SupportPage()),
+                );
+              },
+            ),
+          ],
         ),
-        const SizedBox(height: 12),
-        _linkTile(
-          context,
-          icon: Icons.account_balance_wallet_outlined,
-          label: 'Earnings',
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => EarningsPage(api: widget.api, token: t),
-              ),
-            ).then((_) => _loadMe());
-          },
-        ),
-        const SizedBox(height: 12),
-        _linkTile(
-          context,
-          icon: Icons.card_giftcard,
-          label: 'Daily Rewards',
-          onTap: () async {
-            if (_payload == null) return;
-            final resultCoins = await Navigator.of(context).push<int>(
-              MaterialPageRoute(
-                builder: (ctx) => DailyRewardPage(
-                  api: widget.api,
-                  token: t,
-                  initialRewardsData: _payload!['rewards'] ?? {},
-                  initialCoins: _payload!['user']?['coin_balance'] ?? 0,
-                ),
-              ),
-            );
-            if (resultCoins != null) _loadMe();
-          },
-        ),
-        const SizedBox(height: 12),
-        _linkTile(
-          context,
-          icon: Icons.casino_outlined,
-          label: 'Daily Spin',
-          onTap: () async {
-            if (_payload == null) return;
-            final resultCoins = await Navigator.of(context).push<int>(
-              MaterialPageRoute(
-                builder: (ctx) => SpinWheelPage(
-                  api: widget.api,
-                  token: t,
-                  initialCoins: _payload!['user']?['coin_balance'] ?? 0,
-                  initialRemainingSpins: _payload!['spin']?['remaining_spins'] ?? 0,
-                  initialBonusSpins: _payload!['spin']?['bonus_spins'] ?? 0,
-                ),
-              ),
-            );
-            if (resultCoins != null) _loadMe();
-          },
-        ),
-        const SizedBox(height: 12),
-        _linkTile(
-          context,
-          icon: Icons.leaderboard_outlined,
-          label: 'Leaderboard',
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (context) => LeaderboardPage(
-                  api: widget.api,
-                  token: t,
-                ),
-              ),
-            );
-          },
-        ),
-        const SizedBox(height: 12),
-        _linkTile(
-          context,
-          icon: Icons.support_agent_outlined,
-          label: 'Support & Help',
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const SupportPage()),
-            );
-          },
-        ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
         OutlinedButton.icon(
           onPressed: _logout,
-          icon: const Icon(Icons.logout, size: 20),
+          icon: const Icon(Icons.logout_rounded, size: 20),
           label: const Text('Logout'),
           style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.brandNavy,
-            side: const BorderSide(color: AppColors.borderLight),
+            foregroundColor: Colors.red.shade600,
+            side: BorderSide(color: Colors.red.shade200),
             padding: const EdgeInsets.symmetric(vertical: 14),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
       ],
@@ -425,310 +423,198 @@ class _AccountPageState extends State<AccountPage> {
 
     final initial = name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : '?';
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFDBE6F8)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.brandNavy.withValues(alpha: 0.06),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              height: 4,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [AppColors.brandNavy, AppColors.brandOrange],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.borderLight, width: 2),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.brandNavy.withValues(alpha: 0.08),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: CircleAvatar(
-                          radius: 40,
-                          backgroundColor: AppColors.cardMutedBg,
-                          foregroundColor: AppColors.brandNavy,
-                          child: Text(
-                            initial,
-                            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              name,
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    color: AppColors.brandNavy,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              email,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppColors.textMuted,
-                                  ),
-                            ),
-                            if (ref != null) ...[
-                              const SizedBox(height: 10),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: AppColors.cardMutedBg,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: AppColors.borderLight),
-                                ),
-                                child: SelectableText(
-                                  'Referral: $ref',
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.brandNavy,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  const SizedBox(height: 18),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _statTile(
-                          icon: Icons.star_outline,
-                          label: 'Level',
-                          value: '${user['level'] ?? 1}',
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _statTile(
-                          icon: Icons.bolt_outlined,
-                          label: 'Total XP',
-                          value: '${user['xp'] ?? 0}',
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  // XP Progress Bar
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Level Progress', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.textMuted)),
-                          Text('${(user['xp'] ?? 0) % 100}/100 XP', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.brandOrange)),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: LinearProgressIndicator(
-                          value: ((user['xp'] ?? 0) % 100) / 100.0,
-                          backgroundColor: AppColors.cardMutedBg,
-                          color: AppColors.brandOrange,
-                          minHeight: 8,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _statTile(
-                          icon: Icons.monetization_on_outlined,
-                          label: 'Coins',
-                          value: '$coins',
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _statTile(
-                          icon: Icons.casino_outlined,
-                          label: 'Spins left',
-                          value: '$remaining',
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: AppColors.cardMutedBg,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.borderLight),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          canClaim ? Icons.notifications_active_outlined : Icons.check_circle_outline,
-                          color: canClaim ? AppColors.brandOrange : AppColors.textMuted,
-                          size: 22,
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            canClaim
-                                ? 'Aaj daily reward claim kar sakte ho.'
-                                : 'Aaj ka daily reward claim ho chuka hai.',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textPrimary,
-                                  height: 1.35,
-                                ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _statTile({
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.cardMutedBg,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.borderLight),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 18, color: AppColors.brandOrange),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textMuted,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: AppColors.brandNavy,
-              height: 1.1,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-
-
-  Widget _linkTile(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      elevation: 0,
-      shadowColor: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Ink(
+    return Column(
+      children: [
+        // Premium Profile Header with Gradient
+        Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFDBE6F8)),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF0B2C5F), Color(0xFF1A4A8A), Color(0xFF2563AB)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: AppColors.brandNavy.withValues(alpha: 0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
+                color: const Color(0xFF0B2C5F).withValues(alpha: 0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
+            padding: const EdgeInsets.all(20),
+            child: Column(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.cardMutedBg,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(icon, color: AppColors.brandNavy, size: 22),
+                Row(
+                  children: [
+                    // Avatar
+                    Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 2),
+                      ),
+                      child: CircleAvatar(
+                        radius: 34,
+                        backgroundColor: Colors.white.withValues(alpha: 0.15),
+                        child: Text(initial, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: Colors.white)),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: Colors.white)),
+                          const SizedBox(height: 4),
+                          Text(email, style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.7))),
+                          if (ref != null) ...[
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.share_rounded, size: 13, color: Colors.white.withValues(alpha: 0.8)),
+                                  const SizedBox(width: 6),
+                                  SelectableText(ref, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.brandNavy,
-                        ),
-                  ),
+                const SizedBox(height: 20),
+                // Stats Row
+                Row(
+                  children: [
+                    _miniStat(Icons.monetization_on_rounded, '$coins', 'Coins', const Color(0xFFFFD700)),
+                    _miniStat(Icons.bolt_rounded, '${user['xp'] ?? 0}', 'XP', AppColors.brandOrange),
+                    _miniStat(Icons.star_rounded, 'Lv ${user['level'] ?? 1}', 'Level', const Color(0xFF4FC3F7)),
+                    _miniStat(Icons.casino_rounded, '$remaining', 'Spins', const Color(0xFF81C784)),
+                  ],
                 ),
-                const Icon(Icons.chevron_right_rounded, color: AppColors.brandOrange, size: 22),
+                const SizedBox(height: 16),
+                // XP Progress
+                Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Level Progress', style: TextStyle(fontSize: 10, color: Colors.white.withValues(alpha: 0.6), fontWeight: FontWeight.w600)),
+                        Text('${(user['xp'] ?? 0) % 100}/100 XP', style: TextStyle(fontSize: 10, color: Colors.white.withValues(alpha: 0.8), fontWeight: FontWeight.w700)),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: LinearProgressIndicator(
+                        value: ((user['xp'] ?? 0) % 100) / 100.0,
+                        backgroundColor: Colors.white.withValues(alpha: 0.15),
+                        color: AppColors.brandOrange,
+                        minHeight: 6,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        // Daily reward banner
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: canClaim ? const Color(0xFFFFF8E1) : AppColors.pageBackground,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: canClaim ? AppColors.brandOrange.withValues(alpha: 0.3) : AppColors.borderLight),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                canClaim ? Icons.card_giftcard_rounded : Icons.check_circle_rounded,
+                color: canClaim ? AppColors.brandOrange : AppColors.indiaGreen,
+                size: 22,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  canClaim ? 'Daily reward available! Claim now →' : 'Daily reward claimed ✓',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: canClaim ? AppColors.brandOrange : AppColors.textMuted),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _miniStat(IconData icon, String value, String label, Color color) {
+    return Expanded(
+      child: Column(
+        children: [
+          Icon(icon, size: 20, color: color),
+          const SizedBox(height: 4),
+          Text(value, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
+          Text(label, style: TextStyle(fontSize: 9, color: Colors.white.withValues(alpha: 0.6), fontWeight: FontWeight.w500)),
+        ],
+      ),
+    );
+  }
+
+
+
+  Widget _gridTile({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: () {
+          HapticService.lightTap();
+          onTap();
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: color.withValues(alpha: 0.15)),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [color.withValues(alpha: 0.8), color],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(color: color.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4)),
+                  ],
+                ),
+                child: Icon(icon, color: Colors.white, size: 24),
+              ),
+              const SizedBox(height: 10),
+              Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: color)),
+            ],
           ),
         ),
       ),

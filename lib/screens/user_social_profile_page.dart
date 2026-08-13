@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:glass_kit/glass_kit.dart';
+import '../widgets/frosted_container.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 
@@ -110,7 +110,7 @@ class _UserSocialProfilePageState extends State<UserSocialProfilePage> {
           const SizedBox(height: 30),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: GlassContainer.clearGlass(
+            child: FrostedContainer(
               height: 100,
               width: double.infinity,
               borderRadius: BorderRadius.circular(16),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:glass_kit/glass_kit.dart';
+import '../../widgets/frosted_container.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../providers/local_explorer_provider.dart';
 import '../../models/place_model.dart';
@@ -201,12 +201,11 @@ class _LocalExplorerScreenState extends State<LocalExplorerScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Transform.translate(
         offset: const Offset(0, -30),
-        child: GlassContainer.clearGlass(
+        child: FrostedContainer(
           height: 60,
           width: double.infinity,
           borderRadius: BorderRadius.circular(30),
           borderWidth: 0.5,
-          borderColor: Colors.white.withValues(alpha: 0.3),
           child: GestureDetector(
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SearchScreen())),
             child: Row(
@@ -429,12 +428,11 @@ class _LocalExplorerScreenState extends State<LocalExplorerScreen> {
       )),
       child: Hero(
         tag: 'place_${place.id}',
-        child: GlassContainer.clearGlass(
+        child: FrostedContainer(
           width: 180,
           margin: const EdgeInsets.only(right: 12),
           borderRadius: BorderRadius.circular(20),
           borderWidth: 0.5,
-          borderColor: Colors.white.withValues(alpha: 0.3),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

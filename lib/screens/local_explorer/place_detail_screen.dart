@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:glass_kit/glass_kit.dart';
+import '../../widgets/frosted_container.dart';
 import '../../providers/local_explorer_provider.dart';
 import '../../models/place_model.dart';
 import '../../theme/app_theme.dart';
@@ -136,12 +136,11 @@ class PlaceDetailScreen extends StatelessWidget {
             const SizedBox(height: 24),
             _buildSectionTitle(Icons.location_on, 'Address'),
             const SizedBox(height: 8),
-            GlassContainer.clearGlass(
+            FrostedContainer(
               width: double.infinity,
               padding: const EdgeInsets.all(14),
               borderRadius: BorderRadius.circular(16),
               borderWidth: 0.5,
-              borderColor: Colors.white.withValues(alpha: 0.3),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -187,12 +186,11 @@ class PlaceDetailScreen extends StatelessWidget {
             ],
             _buildSectionTitle(Icons.access_time, 'Opening Hours'),
             const SizedBox(height: 8),
-            GlassContainer.clearGlass(
+            FrostedContainer(
               width: double.infinity,
               padding: const EdgeInsets.all(14),
               borderRadius: BorderRadius.circular(16),
               borderWidth: 0.5,
-              borderColor: Colors.white.withValues(alpha: 0.3),
               child: place.openingHours != null && place.openingHours!.isNotEmpty
                   ? Column(
                       children: place.openingHours!.split(',').map((hour) => Padding(
@@ -222,12 +220,11 @@ class PlaceDetailScreen extends StatelessWidget {
             ],
             _buildSectionTitle(Icons.reviews, 'Reviews'),
             const SizedBox(height: 8),
-            GlassContainer.clearGlass(
+            FrostedContainer(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               borderRadius: BorderRadius.circular(16),
               borderWidth: 0.5,
-              borderColor: Colors.white.withValues(alpha: 0.3),
               child: Column(
                 children: [
                   Row(
@@ -313,12 +310,11 @@ class PlaceDetailScreen extends StatelessWidget {
   }
 
   Widget _buildInfoRow(IconData icon, String label, String value, VoidCallback onTap) {
-    return GlassContainer.clearGlass(
+    return FrostedContainer(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       borderRadius: BorderRadius.circular(16),
       borderWidth: 0.5,
-      borderColor: Colors.white.withValues(alpha: 0.3),
       child: GestureDetector(
         onTap: onTap,
         child: Row(
@@ -367,10 +363,9 @@ class PlaceDetailScreen extends StatelessWidget {
                 )),
                 child: SizedBox(
                   width: 140,
-                  child: GlassContainer.clearGlass(
+                  child: FrostedContainer(
                     borderRadius: BorderRadius.circular(16),
                     borderWidth: 0.5,
-                    borderColor: Colors.white.withValues(alpha: 0.3),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

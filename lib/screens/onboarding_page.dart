@@ -80,22 +80,24 @@ class _OnboardingPageState extends State<OnboardingPage> {
               child: Row(
                 children: [
                   // Dots
-                  Row(
-                    children: List.generate(
-                      _pages.length,
-                      (i) => AnimatedContainer(
-                        duration: const Duration(milliseconds: 250),
-                        margin: const EdgeInsets.only(right: 6),
-                        width: _currentPage == i ? 24 : 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: _currentPage == i ? _pages[_currentPage].color : Colors.grey.shade300,
-                          borderRadius: BorderRadius.circular(4),
+                  Flexible(
+                    child: Row(
+                      children: List.generate(
+                        _pages.length,
+                        (i) => AnimatedContainer(
+                          duration: const Duration(milliseconds: 250),
+                          margin: const EdgeInsets.only(right: 6),
+                          width: _currentPage == i ? 24 : 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: _currentPage == i ? _pages[_currentPage].color : Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  const Spacer(),
+                  const SizedBox(width: 12),
                   // Next/Get Started button
                   FilledButton(
                     onPressed: () {

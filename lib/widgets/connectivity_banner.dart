@@ -40,26 +40,30 @@ class _ConnectivityBannerState extends State<ConnectivityBanner> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Stack(
       children: [
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          height: _isOffline ? 32 : 0,
-          color: Colors.red.shade600,
-          child: _isOffline
-              ? const Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.wifi_off_rounded, size: 14, color: Colors.white),
-                      SizedBox(width: 6),
-                      Text('No internet connection', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                )
-              : null,
-        ),
-        Expanded(child: widget.child),
+        widget.child,
+        if (_isOffline)
+          Positioned(
+            top: MediaQuery.of(context).padding.top,
+            left: 0,
+            right: 0,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              height: 32,
+              color: Colors.red.shade600,
+              child: const Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.wifi_off_rounded, size: 14, color: Colors.white),
+                    SizedBox(width: 6),
+                    Text('No internet connection', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }

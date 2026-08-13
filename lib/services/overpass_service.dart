@@ -59,7 +59,8 @@ class OverpassService {
     int radius = 15000,
     int limit = 30,
   }) async {
-    final tags = category == 'all' ? _allCategories : [category];
+    final normalizedCategory = category.toLowerCase().replaceAll(' ', '_');
+    final tags = normalizedCategory == 'all' ? _allCategories : [normalizedCategory];
     final tagFilters = <String>[];
 
     for (final t in tags) {

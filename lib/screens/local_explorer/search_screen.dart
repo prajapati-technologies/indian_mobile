@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:glass_kit/glass_kit.dart';
+import '../../widgets/frosted_container.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../providers/local_explorer_provider.dart';
 import '../../models/place_model.dart';
@@ -73,12 +73,11 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget _buildSearchBar(LocalExplorerProvider provider) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: GlassContainer.clearGlass(
+      child: FrostedContainer(
         height: 56,
         width: double.infinity,
         borderRadius: BorderRadius.circular(28),
         borderWidth: 0.5,
-        borderColor: Colors.white.withValues(alpha: 0.3),
         child: Row(
           children: [
             IconButton(
@@ -260,11 +259,10 @@ class _SearchScreenState extends State<SearchScreen> {
       onTap: () => Navigator.push(context, MaterialPageRoute(
         builder: (_) => PlaceDetailScreen(place: place),
       )),
-      child: GlassContainer.clearGlass(
+      child: FrostedContainer(
         margin: const EdgeInsets.only(bottom: 12),
         borderRadius: BorderRadius.circular(16),
         borderWidth: 0.5,
-        borderColor: Colors.white.withValues(alpha: 0.3),
         child: Row(
           children: [
             ClipRRect(

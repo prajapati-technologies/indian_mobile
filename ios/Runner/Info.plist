@@ -40,7 +40,7 @@
 			<key>UIApplicationShortcutItemType</key>
 			<string>com.indiainformations.app.jobs</string>
 			<key>UIApplicationShortcutItemTitle</key>
-			<string>Jobs & Results</string>
+			<string>Jobs and Results</string>
 			<key>UIApplicationShortcutItemIconType</key>
 			<string>UIApplicationShortcutIconTypeFavorite</string>
 		</dict>

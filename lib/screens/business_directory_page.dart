@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:glass_kit/glass_kit.dart';
+import '../widgets/frosted_container.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import 'business_list_page.dart';
@@ -91,7 +91,7 @@ class _BusinessDirectoryPageState extends State<BusinessDirectoryPage> {
   }
 
   Widget _buildSearchBar() {
-    return GlassContainer.clearGlass(
+    return FrostedContainer(
       height: 50,
       width: double.infinity,
       borderRadius: BorderRadius.circular(12),

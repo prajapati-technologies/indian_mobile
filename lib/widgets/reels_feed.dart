@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:glass_kit/glass_kit.dart';
+import '../widgets/frosted_container.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ReelsFeed extends StatefulWidget {
@@ -107,7 +107,7 @@ class _ReelItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Source Badge
-              GlassContainer.clearGlass(
+              FrostedContainer(
                 height: 28,
                 width: 120,
                 borderRadius: BorderRadius.circular(20),
@@ -178,10 +178,10 @@ class _SideButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        GlassContainer.clearGlass(
+        FrostedContainer(
           height: 50,
           width: 50,
-          shape: BoxShape.circle,
+          borderRadius: BorderRadius.circular(25),
           child: Icon(icon, color: Colors.white, size: 28),
         ),
         const SizedBox(height: 4),
