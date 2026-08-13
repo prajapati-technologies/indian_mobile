@@ -9,6 +9,7 @@ import 'screens/jobs/job_hub_page.dart';
 import 'services/api_service.dart';
 import 'services/auth_store.dart';
 import 'services/api_url_store.dart';
+import 'services/app_review_service.dart';
 import 'theme/app_theme.dart';
 import 'screens/business_directory_page.dart';
 
@@ -29,6 +30,7 @@ class _AppShellState extends State<AppShell> {
   void initState() {
     super.initState();
     _bootstrap();
+    AppReviewService.trackSession(); // Track session for in-app review
     AuthStore.readToken().then((t) {
       if (mounted) {
         setState(() => _token = t);
@@ -180,7 +182,10 @@ class _AppShellState extends State<AppShell> {
               ),
               child: NavigationBar(
                 selectedIndex: _tab,
-                onDestinationSelected: (i) => setState(() => _tab = i),
+                onDestinationSelected: (i) {
+                  HapticService.selectionTap();
+                  setState(() => _tab = i);
+                },
                 height: 68,
                 destinations: const [
                   NavigationDestination(

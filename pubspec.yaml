@@ -59,6 +59,7 @@ dependencies:
   carousel_slider: ^5.1.2
   url_launcher: ^6.3.1
   app_tracking_transparency: ^2.0.6
+  in_app_review: ^2.0.10
   vector_math: ^2.1.4
   geolocator: ^13.0.2
   flutter_map: ^7.0.2

@@ -9,6 +9,7 @@ import '../widgets/news_feed_card.dart';
 import 'bookmarks_page.dart';
 import 'category_news_page.dart';
 import 'news_detail_page.dart';
+import 'search_page.dart';
 import 'jobs/job_list_page.dart';
 
 class FeedPage extends StatefulWidget {
@@ -160,6 +161,16 @@ class _FeedPageState extends State<FeedPage> {
           ),
         ),
         actions: [
+          IconButton(
+            tooltip: 'Search',
+            icon: const Icon(Icons.search_rounded),
+            color: AppColors.brandNavy,
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(
+                builder: (_) => SearchPage(api: widget.api),
+              ));
+            },
+          ),
           IconButton(
             tooltip: 'Saved Articles',
             icon: const Icon(Icons.bookmark_rounded),

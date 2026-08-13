@@ -7,6 +7,7 @@ import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:indian_mobile/app_shell.dart';
 import 'package:indian_mobile/theme/app_theme.dart';
 import 'package:indian_mobile/providers/local_explorer_provider.dart';
+import 'package:indian_mobile/providers/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +29,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => LocalExplorerProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       child: const IndianInfoApp(),
     ),
@@ -44,10 +46,13 @@ class IndianInfoApp extends StatefulWidget {
 class _IndianInfoAppState extends State<IndianInfoApp> {
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
     return MaterialApp(
       title: 'Indian Information',
       debugShowCheckedModeBanner: false,
       theme: buildIndianInformationTheme(),
+      darkTheme: buildIndianInformationDarkTheme(),
+      themeMode: themeProvider.mode,
       locale: const Locale('en'),
       supportedLocales: const [Locale('en')],
       localizationsDelegates: const [

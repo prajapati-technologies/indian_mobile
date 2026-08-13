@@ -159,3 +159,107 @@ ThemeData buildIndianInformationTheme() {
     ),
   );
 }
+
+/// Dark theme variant
+ThemeData buildIndianInformationDarkTheme() {
+  const orange = AppColors.brandOrange;
+
+  const darkBg = Color(0xFF121212);
+  const darkSurface = Color(0xFF1E1E1E);
+  const darkCard = Color(0xFF252525);
+
+  final colorScheme = ColorScheme.dark(
+    primary: orange,
+    onPrimary: Colors.white,
+    primaryContainer: darkCard,
+    onPrimaryContainer: Colors.white,
+    secondary: orange,
+    onSecondary: Colors.white,
+    surface: darkSurface,
+    onSurface: Colors.white,
+    onSurfaceVariant: const Color(0xFFABB5C5),
+    outline: const Color(0xFF3A3A3A),
+    outlineVariant: const Color(0xFF2A2A2A),
+    surfaceContainerHighest: darkCard,
+  );
+
+  final baseText = GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme);
+
+  return ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    colorScheme: colorScheme,
+    scrollbarTheme: const ScrollbarThemeData(
+      thumbVisibility: WidgetStatePropertyAll(false),
+    ),
+    textTheme: baseText,
+    scaffoldBackgroundColor: darkBg,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: darkSurface,
+      foregroundColor: Colors.white,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      surfaceTintColor: Colors.transparent,
+      centerTitle: false,
+      titleTextStyle: TextStyle(
+        color: Colors.white,
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+    cardTheme: CardThemeData(
+      color: darkCard,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: Color(0xFF3A3A3A)),
+      ),
+      margin: EdgeInsets.zero,
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: orange,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      indicatorColor: orange.withValues(alpha: 0.2),
+      indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      labelTextStyle: WidgetStateProperty.resolveWith((states) {
+        final selected = states.contains(WidgetState.selected);
+        return TextStyle(
+          fontSize: 11,
+          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+          color: selected ? orange : const Color(0xFFABB5C5),
+        );
+      }),
+      iconTheme: WidgetStateProperty.resolveWith((states) {
+        final selected = states.contains(WidgetState.selected);
+        return IconThemeData(
+          color: selected ? orange : const Color(0xFFABB5C5),
+          size: selected ? 28 : 24,
+        );
+      }),
+    ),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: darkCard,
+      contentTextStyle: const TextStyle(color: Colors.white),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    ),
+    dividerTheme: const DividerThemeData(
+      color: Color(0xFF3A3A3A),
+      thickness: 1,
+    ),
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+      },
+    ),
+  );
+}

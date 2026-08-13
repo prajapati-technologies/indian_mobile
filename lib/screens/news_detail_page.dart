@@ -9,6 +9,7 @@ import '../services/ad_service.dart';
 import '../services/api_service.dart';
 import '../services/auth_store.dart';
 import '../services/offline_cache_service.dart';
+import '../services/app_review_service.dart';
 import '../theme/app_theme.dart';
 
 class NewsDetailPage extends StatefulWidget {
@@ -84,6 +85,7 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
 
   Future<void> _toggleBookmark() async {
     if (_data == null) return;
+    HapticService.mediumTap();
     if (_isBookmarked) {
       await OfflineCacheService.removeBookmark(widget.slug);
       if (mounted) {
