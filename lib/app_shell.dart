@@ -10,6 +10,8 @@ import 'services/api_service.dart';
 import 'services/auth_store.dart';
 import 'services/api_url_store.dart';
 import 'services/app_review_service.dart';
+import 'services/app_update_service.dart';
+import 'services/rewarded_ad_service.dart';
 import 'theme/app_theme.dart';
 import 'screens/business_directory_page.dart';
 
@@ -30,7 +32,8 @@ class _AppShellState extends State<AppShell> {
   void initState() {
     super.initState();
     _bootstrap();
-    AppReviewService.trackSession(); // Track session for in-app review
+    AppReviewService.trackSession();
+    RewardedAdManager.preload(); // Pre-load rewarded ad
     AuthStore.readToken().then((t) {
       if (mounted) {
         setState(() => _token = t);
@@ -51,6 +54,10 @@ class _AppShellState extends State<AppShell> {
       setState(() {
         _api = ApiService(url);
       });
+      // Check for app updates after API is ready
+      if (mounted) {
+        AppUpdateService.checkForUpdate(context, _api!);
+      }
     } catch (e) {
       if (!mounted) {
         return;

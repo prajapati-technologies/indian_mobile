@@ -6,6 +6,7 @@ import '../services/api_service.dart';
 import '../services/offline_cache_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/news_feed_card.dart';
+import '../widgets/trending_section.dart';
 import 'bookmarks_page.dart';
 import 'category_news_page.dart';
 import 'news_detail_page.dart';
@@ -363,6 +364,11 @@ class _FeedPageState extends State<FeedPage> {
               ),
             ),
           ),
+
+        // 2.5 Trending Now Section
+        SliverToBoxAdapter(
+          child: TrendingSection(api: widget.api),
+        ),
 
         // 3. Featured Category Sections
         if (_featuredSections.isEmpty && _categories.isNotEmpty)

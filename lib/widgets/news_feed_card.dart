@@ -77,6 +77,7 @@ class NewsFeedCard extends StatelessWidget {
     }
 
     final int views = (item['views_count'] as int?) ?? 0;
+    final int readTime = (item['read_time'] as int?) ?? 1;
     String viewsCount = views.toString();
     if (views >= 1000) {
       viewsCount = '${(views / 1000).toStringAsFixed(1)}K';
@@ -163,8 +164,22 @@ class NewsFeedCard extends StatelessWidget {
                             padding: EdgeInsets.symmetric(horizontal: 6),
                             child: Text('|', style: TextStyle(color: AppColors.borderLight, fontSize: 11)),
                           ),
+                        const Icon(Icons.schedule_rounded, size: 12, color: AppColors.textMuted),
+                        const SizedBox(width: 3),
+                        Text(
+                          '$readTime min',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textMuted,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 6),
+                          child: Text('•', style: TextStyle(color: AppColors.textMuted, fontSize: 11)),
+                        ),
                         const Icon(Icons.remove_red_eye_outlined, size: 12, color: AppColors.textMuted),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: 3),
                         Text(
                           viewsCount,
                           style: const TextStyle(

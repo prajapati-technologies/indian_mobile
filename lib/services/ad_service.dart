@@ -41,6 +41,18 @@ class AdService {
         : 'ca-app-pub-3940256099942544/1712485313';
   }
 
+  static String get nativeAdUnitId {
+    if (kReleaseMode) {
+      // Replace with your real Native Ad ID
+      return Platform.isAndroid
+          ? 'ca-app-pub-3940256099942544/2247696110'
+          : 'ca-app-pub-3940256099942544/3986624511';
+    }
+    return Platform.isAndroid
+        ? 'ca-app-pub-3940256099942544/2247696110'
+        : 'ca-app-pub-3940256099942544/3986624511';
+  }
+
   static void loadInterstitialAd(Function(InterstitialAd) onAdLoaded) {
     InterstitialAd.load(
       adUnitId: interstitialAdUnitId,
