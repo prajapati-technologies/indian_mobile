@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
+import 'optimized_image.dart';
 
 class NewsFeedCard extends StatelessWidget {
   const NewsFeedCard({
@@ -91,15 +92,11 @@ class NewsFeedCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Image
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: SizedBox(
-                  width: 120,
-                  height: 80,
-                  child: img != null
-                      ? Image.network(img, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Container(color: AppColors.borderLight))
-                      : Container(color: AppColors.borderLight),
-                ),
+              OptimizedImage(
+                imageUrl: img,
+                width: 120,
+                height: 80,
+                borderRadius: 12,
               ),
               const SizedBox(width: 14),
               // Content

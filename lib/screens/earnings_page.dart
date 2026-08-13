@@ -223,7 +223,7 @@ class _EarningsPageState extends State<EarningsPage> {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: _transactions.length,
-      separatorBuilder: (_, __) => const Divider(),
+      separatorBuilder: (_, _) => const Divider(),
       itemBuilder: (context, index) {
         final t = _transactions[index];
         final coins = t['coins'] ?? 0;
@@ -260,7 +260,7 @@ class _EarningsPageState extends State<EarningsPage> {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: _withdrawals.length,
-      separatorBuilder: (_, __) => const Divider(),
+      separatorBuilder: (_, _) => const Divider(),
       itemBuilder: (context, index) {
         final w = _withdrawals[index];
         final coins = w['coins'] ?? 0;

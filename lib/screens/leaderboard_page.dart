@@ -132,7 +132,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
       child: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: users.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           final u = users[index] as Map<String, dynamic>;
           final int rank = index + 1;

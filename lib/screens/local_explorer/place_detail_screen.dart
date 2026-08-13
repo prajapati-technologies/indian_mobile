@@ -57,8 +57,8 @@ class PlaceDetailScreen extends StatelessWidget {
               child: CachedNetworkImage(
                 imageUrl: place.imageUrl ?? '',
                 fit: BoxFit.cover,
-                placeholder: (_, __) => Container(color: Colors.grey[800]),
-                errorWidget: (_, __, ___) => Container(color: Colors.grey[800], child: const Icon(Icons.image, color: Colors.white38, size: 60)),
+                placeholder: (_, _) => Container(color: Colors.grey[800]),
+                errorWidget: (_, _, _) => Container(color: Colors.grey[800], child: const Icon(Icons.image, color: Colors.white38, size: 60)),
               ),
             ),
             Container(
@@ -66,7 +66,7 @@ class PlaceDetailScreen extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
+                  colors: [Colors.transparent, Colors.black.withValues(alpha: 0.8)],
                 ),
               ),
             ),
@@ -82,7 +82,7 @@ class PlaceDetailScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: AppColors.brandNavy.withOpacity(0.9),
+                          color: AppColors.brandNavy.withValues(alpha: 0.9),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(place.category, style: const TextStyle(color: Colors.white, fontSize: 12, fontFamily: 'Poppins')),
@@ -141,7 +141,7 @@ class PlaceDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.all(14),
               borderRadius: BorderRadius.circular(16),
               borderWidth: 0.5,
-              borderColor: Colors.white.withOpacity(0.3),
+              borderColor: Colors.white.withValues(alpha: 0.3),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -192,7 +192,7 @@ class PlaceDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.all(14),
               borderRadius: BorderRadius.circular(16),
               borderWidth: 0.5,
-              borderColor: Colors.white.withOpacity(0.3),
+              borderColor: Colors.white.withValues(alpha: 0.3),
               child: place.openingHours != null && place.openingHours!.isNotEmpty
                   ? Column(
                       children: place.openingHours!.split(',').map((hour) => Padding(
@@ -212,7 +212,7 @@ class PlaceDetailScreen extends StatelessWidget {
                 children: (place.tags ?? '').split(',').map((tag) => Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: AppColors.brandNavy.withOpacity(0.1),
+                    color: AppColors.brandNavy.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(tag, style: TextStyle(color: AppColors.brandNavy, fontFamily: 'Poppins', fontSize: 12)),
@@ -227,7 +227,7 @@ class PlaceDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.all(20),
               borderRadius: BorderRadius.circular(16),
               borderWidth: 0.5,
-              borderColor: Colors.white.withOpacity(0.3),
+              borderColor: Colors.white.withValues(alpha: 0.3),
               child: Column(
                 children: [
                   Row(
@@ -289,9 +289,9 @@ class PlaceDetailScreen extends StatelessWidget {
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: color.withOpacity(0.3)),
+              border: Border.all(color: color.withValues(alpha: 0.3)),
             ),
             child: Icon(icon, color: color, size: 26),
           ),
@@ -318,7 +318,7 @@ class PlaceDetailScreen extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       borderRadius: BorderRadius.circular(16),
       borderWidth: 0.5,
-      borderColor: Colors.white.withOpacity(0.3),
+      borderColor: Colors.white.withValues(alpha: 0.3),
       child: GestureDetector(
         onTap: onTap,
         child: Row(
@@ -358,7 +358,7 @@ class PlaceDetailScreen extends StatelessWidget {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: similar.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
             itemBuilder: (context, index) {
               final p = similar[index];
               return GestureDetector(
@@ -370,7 +370,7 @@ class PlaceDetailScreen extends StatelessWidget {
                   child: GlassContainer.clearGlass(
                     borderRadius: BorderRadius.circular(16),
                     borderWidth: 0.5,
-                    borderColor: Colors.white.withOpacity(0.3),
+                    borderColor: Colors.white.withValues(alpha: 0.3),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -382,8 +382,8 @@ class PlaceDetailScreen extends StatelessWidget {
                               imageUrl: p.imageUrl ?? '',
                               width: double.infinity,
                               fit: BoxFit.cover,
-                              placeholder: (_, __) => Container(color: Colors.grey[200]),
-                              errorWidget: (_, __, ___) => Container(color: Colors.grey[300], child: const Icon(Icons.image)),
+                              placeholder: (_, _) => Container(color: Colors.grey[200]),
+                              errorWidget: (_, _, _) => Container(color: Colors.grey[300], child: const Icon(Icons.image)),
                             ),
                           ),
                         ),

@@ -38,20 +38,6 @@ class _AppShellState extends State<AppShell> {
     });
   }
 
-  void _showAuthScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => AccountPage(
-          api: _api ?? ApiService(AppConfig.apiBaseUrl),
-          token: _token,
-          onTokenChanged: _setToken,
-          onApiReload: _reloadApiAfterUrlChange,
-        ),
-      ),
-    );
-  }
-
   Future<void> _bootstrap() async {
     try {
       final stored = await ApiUrlStore.read();

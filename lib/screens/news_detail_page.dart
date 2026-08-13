@@ -8,6 +8,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import '../services/ad_service.dart';
 import '../services/api_service.dart';
 import '../services/auth_store.dart';
+import '../services/offline_cache_service.dart';
 import '../theme/app_theme.dart';
 
 class NewsDetailPage extends StatefulWidget {
@@ -25,6 +26,7 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
   String? _error;
   Map<String, dynamic>? _data;
   List<dynamic> _related = [];
+  bool _isBookmarked = false;
 
   // News Read Reward State
   Timer? _timer;
@@ -48,12 +50,63 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
         _related = (j['related'] as List<dynamic>?) ?? [];
         _loading = false;
       });
+      _checkBookmark();
       _startTimer();
     } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _loading = false;
-      });
+      // Try offline cache fallback
+      final cached = await OfflineCacheService.getCachedResponseForce('news_${widget.slug}');
+      if (cached != null) {
+        setState(() {
+          _data = (cached as Map<String, dynamic>)['data'] as Map<String, dynamic>?;
+          _related = (cached['related'] as List<dynamic>?) ?? [];
+          _loading = false;
+          _error = null;
+        });
+        _checkBookmark();
+      } else {
+        setState(() {
+          _error = e.toString();
+          _loading = false;
+        });
+      }
+    }
+
+    // Cache the response for offline use
+    if (_data != null) {
+      OfflineCacheService.cacheResponse('news_${widget.slug}', {'data': _data, 'related': _related});
+    }
+  }
+
+  Future<void> _checkBookmark() async {
+    final bookmarked = await OfflineCacheService.isBookmarked(widget.slug);
+    if (mounted) setState(() => _isBookmarked = bookmarked);
+  }
+
+  Future<void> _toggleBookmark() async {
+    if (_data == null) return;
+    if (_isBookmarked) {
+      await OfflineCacheService.removeBookmark(widget.slug);
+      if (mounted) {
+        setState(() => _isBookmarked = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Removed from saved'), duration: Duration(seconds: 1)),
+        );
+      }
+    } else {
+      final article = {
+        'title': _data!['title'],
+        'slug': _data!['slug'] ?? widget.slug,
+        'image_url': _data!['image_url'],
+        'published_at': _data!['published_at'],
+        'category': _data!['category'],
+      };
+      await OfflineCacheService.addBookmark(article);
+      if (mounted) {
+        setState(() => _isBookmarked = true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Saved for later ✓'), duration: Duration(seconds: 1)),
+        );
+      }
     }
   }
 
@@ -189,6 +242,12 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
       appBar: AppBar(
         title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
         actions: [
+          IconButton(
+            icon: Icon(_isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded),
+            color: _isBookmarked ? AppColors.brandOrange : null,
+            onPressed: _toggleBookmark,
+            tooltip: _isBookmarked ? 'Remove from saved' : 'Save for later',
+          ),
           IconButton(
             icon: const Icon(Icons.share),
             onPressed: _shareArticle,
@@ -381,7 +440,7 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.brandNavy),
           ),
           const SizedBox(height: 12),
-          ..._related.map((item) => _buildRelatedCard(item)).toList(),
+          ..._related.map((item) => _buildRelatedCard(item)),
         ],
       ],
     );

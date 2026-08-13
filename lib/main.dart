@@ -11,6 +11,10 @@ import 'package:indian_mobile/providers/local_explorer_provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Limit image cache to reduce memory usage
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 100 * 1024 * 1024; // 100MB max
+  PaintingBinding.instance.imageCache.maximumSize = 200; // Max 200 images in memory
+
   // Request ATT permission BEFORE initializing ads
   final status = await AppTrackingTransparency.trackingAuthorizationStatus;
   if (status == TrackingStatus.notDetermined) {

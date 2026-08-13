@@ -17,6 +17,7 @@ class BusinessListPage extends StatefulWidget {
 class _BusinessListPageState extends State<BusinessListPage> {
   bool _loading = true;
   List<dynamic> _businesses = [];
+  // ignore: unused_field
   String? _error;
 
   @override
@@ -53,7 +54,7 @@ class _BusinessListPageState extends State<BusinessListPage> {
               : ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: _businesses.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 16),
+                  separatorBuilder: (_, _) => const SizedBox(height: 16),
                   itemBuilder: (context, index) {
                     final biz = _businesses[index];
                     return InkWell(

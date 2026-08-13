@@ -132,28 +132,26 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
 
     try {
-      dynamic res;
       if (_profileImageFile != null) {
         // Convert dynamic payload to string map
         final stringPayload = payload.map((k, v) => MapEntry(k, v.toString()));
         final List<http.MultipartFile> files = [
           await http.MultipartFile.fromPath('profile_pic', _profileImageFile!.path),
         ];
-        res = await widget.api.postMultipart(
+        await widget.api.postMultipart(
           '/me',
           stringPayload,
           token: widget.token,
           files: files,
         );
       } else {
-        res = await widget.api.postJson(
+        await widget.api.postJson(
           '/me',
           payload,
           token: widget.token,
         );
       }
       
-      final data = res as Map<String, dynamic>;
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profile updated successfully'), backgroundColor: Colors.green),

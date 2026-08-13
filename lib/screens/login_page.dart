@@ -66,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
         msg = _parseError(e.body);
       }
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-    } on ApiConnectionException catch (e) {
+    } on ApiConnectionException {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Connection error. Please check your internet and try again.')),
@@ -81,6 +81,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  // ignore: unused_element
   Future<void> _handleGoogleSignIn() async {
     setState(() => _busy = true);
     try {
@@ -302,35 +303,6 @@ class _LoginPageState extends State<LoginPage> {
             )
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _SocialLoginButton extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _SocialLoginButton({
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300),
-        ),
-        child: Icon(icon, color: color, size: 28),
       ),
     );
   }

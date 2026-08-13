@@ -75,7 +75,7 @@ class _NearbyScreenState extends State<NearbyScreen> {
                       ? LatLng(provider.currentPosition!.latitude, provider.currentPosition!.longitude)
                       : const LatLng(28.6139, 77.2090),
                   initialZoom: 14.0,
-                  onTap: (_, __) => Navigator.of(context).maybePop(),
+                  onTap: (_, _) => Navigator.of(context).maybePop(),
                 ),
                 children: [
                   TileLayer(
@@ -102,7 +102,7 @@ class _NearbyScreenState extends State<NearbyScreen> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10)],
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10)],
                       ),
                       child: IconButton(
                         icon: const Icon(Icons.arrow_back),
@@ -115,7 +115,7 @@ class _NearbyScreenState extends State<NearbyScreen> {
                         height: 48,
                         borderRadius: BorderRadius.circular(16),
                         borderWidth: 0.5,
-                        borderColor: Colors.white.withOpacity(0.3),
+                        borderColor: Colors.white.withValues(alpha: 0.3),
                         child: TextField(
                           decoration: InputDecoration(
                             hintText: 'Search nearby...',
@@ -208,7 +208,7 @@ class _NearbyScreenState extends State<NearbyScreen> {
           color: Colors.blue,
           shape: BoxShape.circle,
           border: Border.all(color: Colors.white, width: 3),
-          boxShadow: [BoxShadow(color: Colors.blue.withOpacity(0.4), blurRadius: 12, spreadRadius: 2)],
+          boxShadow: [BoxShadow(color: Colors.blue.withValues(alpha: 0.4), blurRadius: 12, spreadRadius: 2)],
         ),
         child: const Icon(Icons.navigation, color: Colors.white, size: 14),
       ),
@@ -227,7 +227,7 @@ class _NearbyScreenState extends State<NearbyScreen> {
             color: _categoryColor(place.category),
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white, width: 2.5),
-            boxShadow: [BoxShadow(color: _categoryColor(place.category).withOpacity(0.4), blurRadius: 8)],
+            boxShadow: [BoxShadow(color: _categoryColor(place.category).withValues(alpha: 0.4), blurRadius: 8)],
           ),
           child: Icon(_categoryIcon(place.category), color: Colors.white, size: 18),
         ),
@@ -256,8 +256,8 @@ class _NearbyScreenState extends State<NearbyScreen> {
                     width: 80,
                     height: 80,
                     fit: BoxFit.cover,
-                    placeholder: (_, __) => Container(color: Colors.grey[200]),
-                    errorWidget: (_, __, ___) => Container(color: Colors.grey[300], child: const Icon(Icons.image)),
+                    placeholder: (_, _) => Container(color: Colors.grey[200]),
+                    errorWidget: (_, _, _) => Container(color: Colors.grey[300], child: const Icon(Icons.image)),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -365,12 +365,12 @@ class _NearbyScreenState extends State<NearbyScreen> {
                 child: ListView.separated(
                   controller: scrollController,
                   itemCount: places.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  separatorBuilder: (_, _) => const Divider(height: 1),
                   itemBuilder: (_, index) {
                     final place = places[index];
                     return ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: _categoryColor(place.category).withOpacity(0.2),
+                        backgroundColor: _categoryColor(place.category).withValues(alpha: 0.2),
                         child: Icon(_categoryIcon(place.category), color: _categoryColor(place.category), size: 20),
                       ),
                       title: Text(place.name, style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500, fontSize: 14)),

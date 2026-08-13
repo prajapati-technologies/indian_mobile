@@ -20,6 +20,7 @@ class _BusinessDirectoryPageState extends State<BusinessDirectoryPage> {
   bool _loading = true;
   List<dynamic> _categories = [];
   List<dynamic> _featured = [];
+  // ignore: unused_field
   String? _error;
 
   @override
@@ -150,10 +151,10 @@ class _BusinessDirectoryPageState extends State<BusinessDirectoryPage> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.1),
+                  color: iconColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: iconColor.withOpacity(0.2)),
-                  boxShadow: [BoxShadow(color: iconColor.withOpacity(0.05), blurRadius: 10)],
+                  border: Border.all(color: iconColor.withValues(alpha: 0.2)),
+                  boxShadow: [BoxShadow(color: iconColor.withValues(alpha: 0.05), blurRadius: 10)],
                 ),
                 child: Icon(iconData, color: iconColor),
               ),

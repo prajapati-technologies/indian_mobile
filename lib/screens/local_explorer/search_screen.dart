@@ -78,7 +78,7 @@ class _SearchScreenState extends State<SearchScreen> {
         width: double.infinity,
         borderRadius: BorderRadius.circular(28),
         borderWidth: 0.5,
-        borderColor: Colors.white.withOpacity(0.3),
+        borderColor: Colors.white.withValues(alpha: 0.3),
         child: Row(
           children: [
             IconButton(
@@ -187,8 +187,8 @@ class _SearchScreenState extends State<SearchScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withOpacity(0.3)),
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6)],
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 6)],
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -224,7 +224,7 @@ class _SearchScreenState extends State<SearchScreen> {
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: 4,
-        itemBuilder: (_, __) => Padding(
+        itemBuilder: (_, _) => Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Container(height: 120, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))),
         ),
@@ -264,7 +264,7 @@ class _SearchScreenState extends State<SearchScreen> {
         margin: const EdgeInsets.only(bottom: 12),
         borderRadius: BorderRadius.circular(16),
         borderWidth: 0.5,
-        borderColor: Colors.white.withOpacity(0.3),
+        borderColor: Colors.white.withValues(alpha: 0.3),
         child: Row(
           children: [
             ClipRRect(
@@ -274,8 +274,8 @@ class _SearchScreenState extends State<SearchScreen> {
                 width: 90,
                 height: 90,
                 fit: BoxFit.cover,
-                placeholder: (_, __) => Container(width: 90, height: 90, color: Colors.grey[200]),
-                errorWidget: (_, __, ___) => Container(width: 90, height: 90, color: Colors.grey[300], child: const Icon(Icons.image, color: Colors.white54)),
+                placeholder: (_, _) => Container(width: 90, height: 90, color: Colors.grey[200]),
+                errorWidget: (_, _, _) => Container(width: 90, height: 90, color: Colors.grey[300], child: const Icon(Icons.image, color: Colors.white54)),
               ),
             ),
             const SizedBox(width: 12),
@@ -300,7 +300,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: (place.isOpen == true) ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                            color: (place.isOpen == true) ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text((place.isOpen == true) ? 'Open' : 'Closed', style: TextStyle(color: (place.isOpen == true) ? Colors.green : Colors.red, fontSize: 10, fontFamily: 'Poppins')),
@@ -326,7 +326,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
+                        color: Colors.green.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Icon(Icons.call, color: Colors.green, size: 18),

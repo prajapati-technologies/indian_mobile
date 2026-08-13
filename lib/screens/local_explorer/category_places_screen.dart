@@ -22,6 +22,7 @@ class CategoryPlacesScreen extends StatefulWidget {
 
 class _CategoryPlacesScreenState extends State<CategoryPlacesScreen> {
   bool _showMap = false;
+  // ignore: unused_field
   int _page = 1;
   final ScrollController _scrollController = ScrollController();
   final MapController _mapController = MapController();
@@ -116,7 +117,7 @@ class _CategoryPlacesScreenState extends State<CategoryPlacesScreen> {
         child: ListView.builder(
           padding: const EdgeInsets.fromLTRB(16, 100, 16, 16),
           itemCount: 5,
-          itemBuilder: (_, __) => Padding(
+          itemBuilder: (_, _) => Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: Container(height: 160, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20))),
           ),
@@ -152,7 +153,7 @@ class _CategoryPlacesScreenState extends State<CategoryPlacesScreen> {
         margin: const EdgeInsets.only(bottom: 16),
         borderRadius: BorderRadius.circular(20),
         borderWidth: 0.5,
-        borderColor: Colors.white.withOpacity(0.3),
+        borderColor: Colors.white.withValues(alpha: 0.3),
         child: Column(
           children: [
             ClipRRect(
@@ -164,8 +165,8 @@ class _CategoryPlacesScreenState extends State<CategoryPlacesScreen> {
                     height: 140,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    placeholder: (_, __) => Container(height: 140, color: Colors.grey[200]),
-                    errorWidget: (_, __, ___) => Container(height: 140, color: Colors.grey[300], child: const Icon(Icons.image, color: Colors.white54)),
+                    placeholder: (_, _) => Container(height: 140, color: Colors.grey[200]),
+                    errorWidget: (_, _, _) => Container(height: 140, color: Colors.grey[300], child: const Icon(Icons.image, color: Colors.white54)),
                   ),
                   Positioned(
                     top: 8,
@@ -173,7 +174,7 @@ class _CategoryPlacesScreenState extends State<CategoryPlacesScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: _categoryColor(place.category).withOpacity(0.9),
+                        color: _categoryColor(place.category).withValues(alpha: 0.9),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -214,7 +215,7 @@ class _CategoryPlacesScreenState extends State<CategoryPlacesScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.amber.withOpacity(0.15),
+                          color: Colors.amber.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -279,7 +280,7 @@ class _CategoryPlacesScreenState extends State<CategoryPlacesScreen> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -352,7 +353,7 @@ class _CategoryPlacesScreenState extends State<CategoryPlacesScreen> {
                   selected: cat == 'All' || cat == widget.category,
                   onSelected: (_) {},
                   backgroundColor: Colors.white,
-                  selectedColor: AppColors.brandNavy.withOpacity(0.2),
+                  selectedColor: AppColors.brandNavy.withValues(alpha: 0.2),
                   checkmarkColor: AppColors.brandNavy,
                 ),
               )).toList(),
@@ -397,8 +398,8 @@ class _CategoryPlacesScreenState extends State<CategoryPlacesScreen> {
                     width: 60,
                     height: 60,
                     fit: BoxFit.cover,
-                    placeholder: (_, __) => Container(color: Colors.grey[200]),
-                    errorWidget: (_, __, ___) => Container(color: Colors.grey[300], child: const Icon(Icons.image)),
+                    placeholder: (_, _) => Container(color: Colors.grey[200]),
+                    errorWidget: (_, _, _) => Container(color: Colors.grey[300], child: const Icon(Icons.image)),
                   ),
                 ),
                 const SizedBox(width: 12),

@@ -132,10 +132,10 @@ class _DailyRewardPageState extends State<DailyRewardPage> {
   @override
   Widget build(BuildContext context) {
     // Return updated coins on pop
-    return WillPopScope(
-      onWillPop: () async {
-        Navigator.pop(context, _coins);
-        return false;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) Navigator.pop(context, _coins);
       },
       child: Scaffold(
         backgroundColor: AppColors.pageBackground,
@@ -300,8 +300,6 @@ class _DailyRewardPageState extends State<DailyRewardPage> {
         : isToday
             ? AppColors.brandOrange
             : Colors.grey.shade400;
-
-    Color lineColor = isClaimed ? Colors.green.shade500 : Colors.grey.shade300;
 
     return IntrinsicHeight(
       child: Row(

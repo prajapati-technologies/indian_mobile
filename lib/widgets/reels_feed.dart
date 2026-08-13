@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:glass_kit/glass_kit.dart';
 import 'package:shimmer/shimmer.dart';
-import '../theme/app_theme.dart';
 
 class ReelsFeed extends StatefulWidget {
   final List<dynamic> news;
@@ -91,9 +90,9 @@ class _ReelItem extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.black.withOpacity(0.3),
+                Colors.black.withValues(alpha: 0.3),
                 Colors.transparent,
-                Colors.black.withOpacity(0.8),
+                Colors.black.withValues(alpha: 0.8),
               ],
             ),
           ),

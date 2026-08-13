@@ -140,15 +140,15 @@ class _ServicesScreenState extends State<ServicesScreen> with SingleTickerProvid
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.3)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)],
+        border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8)],
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Icon(icon, color: color, size: 28),
@@ -190,7 +190,7 @@ class _ServicesScreenState extends State<ServicesScreen> with SingleTickerProvid
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: 4,
-                itemBuilder: (_, __) => Padding(
+                itemBuilder: (_, _) => Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Container(height: 80, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))),
                 ),
@@ -220,8 +220,8 @@ class _ServicesScreenState extends State<ServicesScreen> with SingleTickerProvid
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.3)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)],
+        border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,7 +233,7 @@ class _ServicesScreenState extends State<ServicesScreen> with SingleTickerProvid
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(icon, color: color, size: 24),
@@ -263,8 +263,8 @@ class _ServicesScreenState extends State<ServicesScreen> with SingleTickerProvid
                         width: 48,
                         height: 48,
                         fit: BoxFit.cover,
-                        placeholder: (_, __) => Container(width: 48, height: 48, color: Colors.grey[200]),
-                        errorWidget: (_, __, ___) => Container(width: 48, height: 48, color: Colors.grey[300], child: const Icon(Icons.image, size: 20)),
+                        placeholder: (_, _) => Container(width: 48, height: 48, color: Colors.grey[200]),
+                        errorWidget: (_, _, _) => Container(width: 48, height: 48, color: Colors.grey[300], child: const Icon(Icons.image, size: 20)),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -285,7 +285,7 @@ class _ServicesScreenState extends State<ServicesScreen> with SingleTickerProvid
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: (place.isOpen == true) ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                        color: (place.isOpen == true) ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text((place.isOpen == true) ? 'Open' : 'Closed', style: TextStyle(color: (place.isOpen == true) ? Colors.green : Colors.red, fontSize: 10, fontFamily: 'Poppins')),

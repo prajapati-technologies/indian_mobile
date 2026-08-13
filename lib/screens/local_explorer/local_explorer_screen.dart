@@ -52,7 +52,7 @@ class _LocalExplorerScreenState extends State<LocalExplorerScreen> {
           ElevatedButton.icon(
             onPressed: () async {
               await launchUrl(Uri.parse('tel:$number'));
-              Navigator.pop(ctx);
+              if (ctx.mounted) Navigator.pop(ctx);
             },
             icon: const Icon(Icons.call),
             label: const Text('Call Now'),
@@ -156,7 +156,7 @@ class _LocalExplorerScreenState extends State<LocalExplorerScreen> {
                   decoration: BoxDecoration(
                     color: Colors.greenAccent,
                     shape: BoxShape.circle,
-                    boxShadow: [BoxShadow(color: Colors.greenAccent.withOpacity(0.6), blurRadius: 8, spreadRadius: 2)],
+                    boxShadow: [BoxShadow(color: Colors.greenAccent.withValues(alpha: 0.6), blurRadius: 8, spreadRadius: 2)],
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -206,7 +206,7 @@ class _LocalExplorerScreenState extends State<LocalExplorerScreen> {
           width: double.infinity,
           borderRadius: BorderRadius.circular(30),
           borderWidth: 0.5,
-          borderColor: Colors.white.withOpacity(0.3),
+          borderColor: Colors.white.withValues(alpha: 0.3),
           child: GestureDetector(
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SearchScreen())),
             child: Row(
@@ -248,7 +248,7 @@ class _LocalExplorerScreenState extends State<LocalExplorerScreen> {
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           itemCount: emergencies.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 8),
+          separatorBuilder: (_, _) => const SizedBox(width: 8),
           itemBuilder: (context, index) {
             final item = emergencies[index];
             return GestureDetector(
@@ -259,8 +259,8 @@ class _LocalExplorerScreenState extends State<LocalExplorerScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8)],
-                  border: Border.all(color: Colors.white.withOpacity(0.3)),
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8)],
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -343,8 +343,8 @@ class _LocalExplorerScreenState extends State<LocalExplorerScreen> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white.withOpacity(0.3)),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6)],
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 6)],
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -352,7 +352,7 @@ class _LocalExplorerScreenState extends State<LocalExplorerScreen> {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Color(cat.$3).withOpacity(0.15),
+                            color: Color(cat.$3).withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(14),
                           ),
                           child: Icon(cat.$2, color: Color(cat.$3), size: 22),
@@ -398,7 +398,7 @@ class _LocalExplorerScreenState extends State<LocalExplorerScreen> {
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: 3,
-                  itemBuilder: (_, __) => Container(
+                  itemBuilder: (_, _) => Container(
                     width: 160, margin: const EdgeInsets.only(right: 12),
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
                   ),
@@ -434,7 +434,7 @@ class _LocalExplorerScreenState extends State<LocalExplorerScreen> {
           margin: const EdgeInsets.only(right: 12),
           borderRadius: BorderRadius.circular(20),
           borderWidth: 0.5,
-          borderColor: Colors.white.withOpacity(0.3),
+          borderColor: Colors.white.withValues(alpha: 0.3),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -449,8 +449,8 @@ class _LocalExplorerScreenState extends State<LocalExplorerScreen> {
                         width: double.infinity,
                         height: double.infinity,
                         fit: BoxFit.cover,
-                        placeholder: (_, __) => Container(color: Colors.grey[200]),
-                        errorWidget: (_, __, ___) => Container(color: Colors.grey[300], child: const Icon(Icons.image, color: Colors.white54)),
+                        placeholder: (_, _) => Container(color: Colors.grey[200]),
+                        errorWidget: (_, _, _) => Container(color: Colors.grey[300], child: const Icon(Icons.image, color: Colors.white54)),
                       ),
                       Positioned(
                         top: 8,
@@ -559,8 +559,8 @@ class _LocalExplorerScreenState extends State<LocalExplorerScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withOpacity(0.3)),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -574,8 +574,8 @@ class _LocalExplorerScreenState extends State<LocalExplorerScreen> {
                     width: double.infinity,
                     height: double.infinity,
                     fit: BoxFit.cover,
-                    placeholder: (_, __) => Container(color: Colors.grey[200]),
-                    errorWidget: (_, __, ___) => Container(color: Colors.grey[300], child: const Icon(Icons.image, color: Colors.white54)),
+                    placeholder: (_, _) => Container(color: Colors.grey[200]),
+                    errorWidget: (_, _, _) => Container(color: Colors.grey[300], child: const Icon(Icons.image, color: Colors.white54)),
                   ),
                 ),
               ),
@@ -603,7 +603,7 @@ class _LocalExplorerScreenState extends State<LocalExplorerScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: (place.isOpen == true) ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                              color: (place.isOpen == true) ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text((place.isOpen == true) ? 'Open' : 'Closed', style: TextStyle(color: (place.isOpen == true) ? Colors.green : Colors.red, fontSize: 10, fontFamily: 'Poppins')),

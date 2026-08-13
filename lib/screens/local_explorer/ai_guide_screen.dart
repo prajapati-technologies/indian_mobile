@@ -237,7 +237,7 @@ class _AiGuideScreenState extends State<AiGuideScreen> {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: AppColors.brandNavy.withOpacity(0.2),
+                color: AppColors.brandNavy.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(Icons.auto_awesome, color: AppColors.brandNavy, size: 20),
@@ -288,13 +288,13 @@ class _AiGuideScreenState extends State<AiGuideScreen> {
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           itemCount: _suggestedPrompts.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 8),
+          separatorBuilder: (_, _) => const SizedBox(width: 8),
           itemBuilder: (context, index) {
             return ActionChip(
               label: Text(_suggestedPrompts[index], style: const TextStyle(fontFamily: 'Poppins', fontSize: 11)),
               avatar: const Icon(Icons.lightbulb_outline, size: 16, color: Colors.amber),
               onPressed: () => _handleSend(_suggestedPrompts[index]),
-              backgroundColor: Colors.amber.withOpacity(0.1),
+              backgroundColor: Colors.amber.withValues(alpha: 0.1),
               side: BorderSide.none,
             );
           },
@@ -318,8 +318,8 @@ class _AiGuideScreenState extends State<AiGuideScreen> {
             bottomLeft: msg.isUser ? const Radius.circular(20) : Radius.zero,
             bottomRight: msg.isUser ? Radius.zero : const Radius.circular(20),
           ),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 6)],
-          border: msg.isUser ? null : Border.all(color: Colors.white.withOpacity(0.3)),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 6)],
+          border: msg.isUser ? null : Border.all(color: Colors.white.withValues(alpha: 0.3)),
         ),
         child: SelectableText(
           msg.text,
@@ -347,7 +347,7 @@ class _AiGuideScreenState extends State<AiGuideScreen> {
             topRight: Radius.circular(20),
             bottomRight: Radius.circular(20),
           ),
-          border: Border.all(color: Colors.white.withOpacity(0.3)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -362,7 +362,7 @@ class _AiGuideScreenState extends State<AiGuideScreen> {
                   child: TweenAnimationBuilder<double>(
                     tween: Tween(begin: 0.3, end: 1.0),
                     duration: Duration(milliseconds: 400 + i * 200),
-                    builder: (_, value, __) => Opacity(
+                    builder: (_, value, _) => Opacity(
                       opacity: value,
                       child: const Text('.', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                     ),
@@ -387,7 +387,7 @@ class _AiGuideScreenState extends State<AiGuideScreen> {
       ),
       decoration: BoxDecoration(
         color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)],
       ),
       child: Row(
         children: [

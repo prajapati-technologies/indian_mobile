@@ -44,6 +44,10 @@ ThemeData buildIndianInformationTheme() {
   return ThemeData(
     useMaterial3: true,
     colorScheme: colorScheme,
+    // Smoother scrolling across the entire app
+    scrollbarTheme: const ScrollbarThemeData(
+      thumbVisibility: WidgetStatePropertyAll(false),
+    ),
     textTheme: baseText.copyWith(
       titleLarge: baseText.titleLarge?.copyWith(color: AppColors.textPrimary),
       titleMedium: baseText.titleMedium?.copyWith(color: AppColors.textPrimary),
@@ -146,6 +150,12 @@ ThemeData buildIndianInformationTheme() {
     dividerTheme: const DividerThemeData(
       color: AppColors.borderLight,
       thickness: 1,
+    ),
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+      },
     ),
   );
 }

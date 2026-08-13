@@ -184,10 +184,10 @@ class _SpinWheelPageState extends State<SpinWheelPage> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        Navigator.pop(context, _coins);
-        return false;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) Navigator.pop(context, _coins);
       },
       child: Scaffold(
         backgroundColor: AppColors.brandNavy,

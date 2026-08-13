@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:barcode_widget/barcode_widget.dart';
 import 'package:file_picker/file_picker.dart';
@@ -217,7 +216,7 @@ class _ImageResizeToolBodyState extends State<ImageResizeToolBody> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: _format,
+                initialValue: _format,
                 decoration: const InputDecoration(
                   labelText: 'Format',
                   border: OutlineInputBorder(),
@@ -758,7 +757,7 @@ class _HashGeneratorToolBodyState extends State<HashGeneratorToolBody> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: _algo,
+                initialValue: _algo,
                 decoration: const InputDecoration(
                   labelText: 'Algorithm',
                   border: OutlineInputBorder(),
@@ -1102,7 +1101,7 @@ class _ImageWatermarkToolBodyState extends State<ImageWatermarkToolBody> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: _position,
+                initialValue: _position,
                 decoration: const InputDecoration(
                   labelText: 'Position',
                   border: OutlineInputBorder(),
@@ -1125,7 +1124,7 @@ class _ImageWatermarkToolBodyState extends State<ImageWatermarkToolBody> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: _colorName,
+                initialValue: _colorName,
                 decoration: const InputDecoration(
                   labelText: 'Color',
                   border: OutlineInputBorder(),
@@ -1328,7 +1327,7 @@ class _MemeMakerToolBodyState extends State<MemeMakerToolBody> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: _colorName,
+                initialValue: _colorName,
                 decoration: const InputDecoration(
                   labelText: 'Text color',
                   border: OutlineInputBorder(),

@@ -58,7 +58,7 @@ class _PdfWordToolBodyState extends State<PdfWordToolBody> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               DropdownButtonFormField<String>(
-                value: _mode,
+                initialValue: _mode,
                 decoration: const InputDecoration(
                   labelText: 'Direction',
                   border: OutlineInputBorder(),
@@ -233,7 +233,7 @@ class _PdfMergeSplitToolBodyState extends State<PdfMergeSplitToolBody> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               DropdownButtonFormField<String>(
-                value: _mode,
+                initialValue: _mode,
                 decoration: const InputDecoration(
                   labelText: 'Mode',
                   border: OutlineInputBorder(),
@@ -369,7 +369,7 @@ class _ImageToPdfToolBodyState extends State<ImageToPdfToolBody> {
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: _selectedFiles!.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    separatorBuilder: (_, _) => const SizedBox(width: 8),
                     itemBuilder: (ctx, i) {
                       final f = _selectedFiles![i];
                       return ClipRRect(
@@ -389,7 +389,7 @@ class _ImageToPdfToolBodyState extends State<ImageToPdfToolBody> {
               ],
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _pageSize,
+                initialValue: _pageSize,
                 decoration: const InputDecoration(
                   labelText: 'Page Size',
                   border: OutlineInputBorder(),
@@ -561,7 +561,7 @@ class _PdfWatermarkToolBodyState extends State<PdfWatermarkToolBody> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: _color,
+                initialValue: _color,
                 decoration: const InputDecoration(
                   labelText: 'Color',
                   border: OutlineInputBorder(),

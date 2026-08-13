@@ -4,12 +4,10 @@ import 'package:flutter/material.dart';
 
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
-import 'package:glass_kit/glass_kit.dart';
 import 'daily_reward_page.dart';
 import 'edit_profile_page.dart';
 import 'leaderboard_page.dart';
 import 'login_page.dart';
-import 'news_detail_page.dart';
 import 'register_page.dart';
 import 'spin_wheel_page.dart';
 import 'earnings_page.dart';
@@ -94,6 +92,7 @@ class _AccountPageState extends State<AccountPage> {
     }
   }
 
+  // ignore: unused_element
   Future<void> _claim() async {
     final t = widget.token;
     if (t == null) {
@@ -118,6 +117,7 @@ class _AccountPageState extends State<AccountPage> {
     }
   }
 
+  // ignore: unused_element
   Future<void> _spin() async {
     final t = widget.token;
     if (t == null) {
@@ -217,10 +217,8 @@ class _AccountPageState extends State<AccountPage> {
       body: RefreshIndicator(
         color: AppColors.brandOrange,
         onRefresh: () async {
-          if (t != null) {
-            await _loadMe();
-          }
-        },
+          await _loadMe();
+                },
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
           physics: const AlwaysScrollableScrollPhysics(),
