@@ -13,6 +13,7 @@ import 'services/app_review_service.dart';
 import 'services/app_update_service.dart';
 import 'services/rewarded_ad_service.dart';
 import 'theme/app_theme.dart';
+import 'widgets/connectivity_banner.dart';
 import 'screens/business_directory_page.dart';
 
 class AppShell extends StatefulWidget {
@@ -136,7 +137,8 @@ class _AppShellState extends State<AppShell> {
     final api = _api!;
     final originKey = api.baseUrl;
 
-    return Scaffold(
+    return ConnectivityBanner(
+      child: Scaffold(
       body: IndexedStack(
         index: _tab,
         children: [
@@ -226,6 +228,7 @@ class _AppShellState extends State<AppShell> {
           ],
         ),
       ),
+    ),
     );
   }
 }

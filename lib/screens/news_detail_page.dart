@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -10,6 +9,7 @@ import '../services/api_service.dart';
 import '../services/auth_store.dart';
 import '../services/offline_cache_service.dart';
 import '../services/app_review_service.dart';
+import '../services/share_service.dart';
 import '../theme/app_theme.dart';
 
 class NewsDetailPage extends StatefulWidget {
@@ -206,10 +206,10 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
     
     final title = _data!['title'] ?? 'News Update';
     final slug = _data!['slug'] ?? widget.slug;
-    final newsUrl = 'https://indiainformations.com/news/$slug';
-    final text = '$title\n\nRead more: $newsUrl\n\nDownload India Informations App for latest news & tools!';
+    final imageUrl = _data!['image_url'] as String?;
     
-    await Share.share(text, subject: title);
+    // Share with image for viral growth
+    await ShareService.shareNewsWithImage(title: title, slug: slug, imageUrl: imageUrl);
     
     final token = await AuthStore.readToken();
     if (token != null) {
