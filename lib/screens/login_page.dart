@@ -57,8 +57,20 @@ class _LoginPageState extends State<LoginPage> {
       }
     } on ApiException catch (e) {
       if (!mounted) return;
-      final msg = _parseError(e.body);
+      String msg;
+      if (e.statusCode == 401 || e.statusCode == 422) {
+        msg = 'Invalid email or password. Please try again.';
+      } else if (e.statusCode == 429) {
+        msg = 'Too many attempts. Please wait a moment and try again.';
+      } else {
+        msg = _parseError(e.body);
+      }
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    } on ApiConnectionException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Connection error. Please check your internet and try again.')),
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));

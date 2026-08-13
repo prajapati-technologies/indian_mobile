@@ -7,6 +7,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../services/ad_service.dart';
+import '../services/interstitial_ad_mixin.dart';
 import '../theme/app_theme.dart';
 
 /// Same keys / titles as `calculators.blade.php` sidebar.
@@ -82,7 +83,7 @@ class CalculatorToolPage extends StatefulWidget {
   State<CalculatorToolPage> createState() => _CalculatorToolPageState();
 }
 
-class _CalculatorToolPageState extends State<CalculatorToolPage> {
+class _CalculatorToolPageState extends State<CalculatorToolPage> with InterstitialAdMixin {
   // AdMob State
   BannerAd? _bannerAd;
   bool _isBannerLoaded = false;
@@ -91,6 +92,7 @@ class _CalculatorToolPageState extends State<CalculatorToolPage> {
   void initState() {
     super.initState();
     _loadAds();
+    loadInterstitial();
   }
 
   void _loadAds() {
@@ -114,16 +116,26 @@ class _CalculatorToolPageState extends State<CalculatorToolPage> {
   @override
   void dispose() {
     _bannerAd?.dispose();
+    disposeInterstitial();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.pageBackground,
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) showInterstitialAndPop();
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.pageBackground,
+        appBar: AppBar(
+          title: Text(widget.title),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: showInterstitialAndPop,
+          ),
+        ),
       body: Column(
         children: [
           Expanded(
@@ -142,6 +154,7 @@ class _CalculatorToolPageState extends State<CalculatorToolPage> {
             ),
         ],
       ),
+    ),
     );
   }
 

@@ -32,12 +32,8 @@ class _AppShellState extends State<AppShell> {
     AuthStore.readToken().then((t) {
       if (mounted) {
         setState(() => _token = t);
-        // If not logged in, show login screen
-        if (t == null || t.isEmpty) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _showAuthScreen();
-          });
-        }
+        // Don't force login on startup - let user browse freely
+        // Login will be required only when they try to use protected features
       }
     });
   }

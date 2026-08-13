@@ -477,6 +477,14 @@ class _UtilityToolsListState extends State<_UtilityToolsList> {
     switch (key) {
       case 'pdf-word':
       case 'pdf-merge-split':
+      case 'pdf-page-counter':
+      case 'pdf-rotate':
+      case 'pdf-compress':
+      case 'pdf-split':
+      case 'png-to-pdf':
+      case 'jpg-to-pdf':
+      case 'text-to-pdf':
+      case 'images-to-pdf':
         return Icons.picture_as_pdf_outlined;
       case 'image-compressor':
       case 'image-resize-convert':

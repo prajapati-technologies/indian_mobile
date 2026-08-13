@@ -10,6 +10,15 @@ import 'package:indian_mobile/providers/local_explorer_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Request ATT permission BEFORE initializing ads
+  final status = await AppTrackingTransparency.trackingAuthorizationStatus;
+  if (status == TrackingStatus.notDetermined) {
+    // Small delay required by Apple (app must be fully rendered first)
+    await Future.delayed(const Duration(milliseconds: 500));
+    await AppTrackingTransparency.requestTrackingAuthorization();
+  }
+
   await MobileAds.instance.initialize();
   runApp(
     MultiProvider(
@@ -29,18 +38,6 @@ class IndianInfoApp extends StatefulWidget {
 }
 
 class _IndianInfoAppState extends State<IndianInfoApp> {
-  @override
-  void initState() {
-    super.initState();
-    _requestTrackingPermission();
-  }
-
-  Future<void> _requestTrackingPermission() async {
-    // Wait for app to be fully loaded before showing ATT dialog
-    await Future.delayed(const Duration(seconds: 1));
-    await AppTrackingTransparency.requestTrackingAuthorization();
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
