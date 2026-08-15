@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/place_model.dart';
@@ -31,19 +32,23 @@ class OverpassService {
     'school': ['["amenity"="school"]'],
     'college': ['["amenity"="college"]'],
     'library': ['["amenity"="library"]'],
-    'salon': ['["shop"="hairdresser"]', '["shop"="beauty"]', '["shop"="hairdresser_supply"]'],
+    'salon': ['["shop"="hairdresser"]', '["shop"="beauty"]'],
     'mechanic': ['["shop"="car_repair"]', '["amenity"="car_repair"]'],
     'grocery': ['["shop"="supermarket"]', '["shop"="grocery"]', '["shop"="convenience"]'],
     'mobile_phone_shop': ['["shop"="mobile_phone"]'],
     'courier': ['["amenity"="courier"]', '["amenity"="parcel_locker"]'],
-    'pg/room': ['["tourism"="hostel"]["name"~"PG|pg|Paying Guest|paying guest",i]', '["amenity"="hostel"]["name"~"PG|pg|Paying Guest",i]'],
+    'pg/room': ['["tourism"="hostel"]', '["tourism"="guest_house"]'],
     'real_estate': ['["shop"="estate_agent"]', '["office"="real_estate"]'],
     'job': ['["office"="employment_agency"]', '["office"="recruitment"]'],
     'government_office': ['["office"="government"]', '["amenity"="public_building"]'],
     'bus_station': ['["amenity"="bus_station"]', '["highway"="bus_stop"]'],
     'railway_station': ['["railway"="station"]'],
     'bank': ['["amenity"="bank"]'],
-    'market': ['["shop"="mall"]', '["amenity"="marketplace"]'],
+    'market': ['["amenity"="marketplace"]', '["shop"="supermarket"]'],
+    'parking': ['["amenity"="parking"]'],
+    'airport': ['["aeroway"="aerodrome"]', '["aeroway"="terminal"]'],
+    'metro': ['["railway"="subway_entrance"]', '["station"="subway"]', '["railway"="station"]["subway"="yes"]'],
+    'post_office': ['["amenity"="post_office"]'],
   };
 
   static const List<String> _allCategories = [
@@ -87,33 +92,62 @@ out body $limit;
 ''';
 
     try {
+      debugPrint('🌐 Overpass: Trying primary server...');
       final response = await http.post(
         Uri.parse(_overpassUrl),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: {'data': query},
-      );
+      ).timeout(const Duration(seconds: 15));
 
-      if (response.statusCode != 200) return [];
+      debugPrint('🌐 Overpass primary: status=${response.statusCode}, bodyLen=${response.body.length}');
 
-      final data = json.decode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
-      final elements = data['elements'] as List<dynamic>? ?? [];
-      final places = <PlaceModel>[];
-      final seen = <String>{};
-
-      for (final el in elements) {
-        final place = PlaceModel.fromOverpassJson(el as Map<String, dynamic>, userLat: lat, userLng: lng);
-        if (place.name == 'Unknown' || place.name.isEmpty) continue;
-        if (seen.contains(place.id)) continue;
-        seen.add(place.id);
-        places.add(place);
-        if (places.length >= limit) break;
+      if (response.statusCode != 200) {
+        // Try alternate Overpass server
+        final altResponse = await http.post(
+          Uri.parse('https://overpass.kumi.systems/api/interpreter'),
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: {'data': query},
+        ).timeout(const Duration(seconds: 15));
+        if (altResponse.statusCode != 200) return [];
+        return _parseOverpassResponse(altResponse, lat, lng, limit);
       }
 
-      places.sort((a, b) => (a.distance ?? double.infinity).compareTo(b.distance ?? double.infinity));
-      return places;
+      return _parseOverpassResponse(response, lat, lng, limit);
     } catch (_) {
-      return [];
+      // Try alternate server on timeout/error
+      try {
+        final altResponse = await http.post(
+          Uri.parse('https://overpass.kumi.systems/api/interpreter'),
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: {'data': query},
+        ).timeout(const Duration(seconds: 15));
+        if (altResponse.statusCode != 200) return [];
+        return _parseOverpassResponse(altResponse, lat, lng, limit);
+      } catch (_) {
+        return [];
+      }
     }
+  }
+
+  List<PlaceModel> _parseOverpassResponse(http.Response response, double lat, double lng, int limit) {
+    final data = json.decode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+    final elements = data['elements'] as List<dynamic>? ?? [];
+    debugPrint('🗺️ Overpass returned ${elements.length} raw elements');
+    final places = <PlaceModel>[];
+    final seen = <String>{};
+
+    for (final el in elements) {
+      final place = PlaceModel.fromOverpassJson(el as Map<String, dynamic>, userLat: lat, userLng: lng);
+      if (place.name == 'Unknown' || place.name.isEmpty) continue;
+      if (seen.contains(place.id)) continue;
+      seen.add(place.id);
+      places.add(place);
+      if (places.length >= limit) break;
+    }
+
+    debugPrint('🗺️ After filtering: ${places.length} valid places');
+    places.sort((a, b) => (a.distance ?? double.infinity).compareTo(b.distance ?? double.infinity));
+    return places;
   }
 
   Future<List<PlaceModel>> searchByText(

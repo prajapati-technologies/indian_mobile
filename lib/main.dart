@@ -17,13 +17,7 @@ void main() async {
   PaintingBinding.instance.imageCache.maximumSizeBytes = 100 * 1024 * 1024;
   PaintingBinding.instance.imageCache.maximumSize = 200;
 
-  // Request ATT permission BEFORE initializing ads
-  final status = await AppTrackingTransparency.trackingAuthorizationStatus;
-  if (status == TrackingStatus.notDetermined) {
-    await Future.delayed(const Duration(milliseconds: 500));
-    await AppTrackingTransparency.requestTrackingAuthorization();
-  }
-
+  // Initialize ads (ATT will be requested after app renders)
   await MobileAds.instance.initialize();
 
   // Error Boundary — suppress known third-party package issues
@@ -70,6 +64,19 @@ class _IndianInfoAppState extends State<IndianInfoApp> {
   void initState() {
     super.initState();
     _checkOnboarding();
+    // Request ATT after app is fully rendered (Apple requirement)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _requestATT();
+    });
+  }
+
+  Future<void> _requestATT() async {
+    // Wait for app to be fully visible
+    await Future.delayed(const Duration(seconds: 2));
+    final status = await AppTrackingTransparency.trackingAuthorizationStatus;
+    if (status == TrackingStatus.notDetermined) {
+      await AppTrackingTransparency.requestTrackingAuthorization();
+    }
   }
 
   Future<void> _checkOnboarding() async {

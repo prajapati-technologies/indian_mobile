@@ -4,7 +4,7 @@ import 'config/app_config.dart';
 import 'screens/account_page.dart';
 import 'screens/feed_page.dart';
 import 'screens/tools_page.dart';
-import 'screens/local_explorer/local_explorer_screen.dart';
+import 'screens/explore_tab.dart';
 import 'screens/jobs/job_hub_page.dart';
 import 'services/api_service.dart';
 import 'services/auth_store.dart';
@@ -149,7 +149,7 @@ class _AppShellState extends State<AppShell> {
             onOpenAccountTab: _requireLogin,
           ),
           ToolsPage(api: api, token: _token, onRequireLogin: _requireLogin),
-          const LocalExplorerScreen(),
+          const ExploreTab(),
           JobHubPage(api: api),
           BusinessDirectoryPage(api: api, token: _token, onRequireLogin: _requireLogin),
         ],
