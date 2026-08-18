@@ -108,6 +108,16 @@ class ApiService {
     });
   }
 
+  Future<dynamic> deleteJson(String path, {String? token}) async {
+    return _run(() async {
+      final r = await http.delete(
+        _uri(path),
+        headers: _headers(token, jsonBody: true),
+      );
+      return _decode(r);
+    });
+  }
+
   Future<dynamic> postMultipart(
     String path,
     Map<String, String> fields, {

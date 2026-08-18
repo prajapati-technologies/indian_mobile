@@ -93,6 +93,56 @@ class _AccountPageState extends State<AccountPage> {
     }
   }
 
+  Future<void> _confirmDeleteAccount(String token) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_rounded, color: Colors.red, size: 28),
+            SizedBox(width: 10),
+            Text('Delete Account', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          ],
+        ),
+        content: const Text(
+          'This will permanently delete your account and all associated data including coins, rewards, and saved progress.\n\nThis action cannot be undone.',
+          style: TextStyle(fontSize: 14, height: 1.6),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete Permanently'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      await widget.api.deleteJson('/me/delete', token: token);
+      widget.onTokenChanged(null);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Account deleted successfully')),
+        );
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete account: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
   // ignore: unused_element
   Future<void> _claim() async {
     final t = widget.token;
@@ -404,6 +454,15 @@ class _AccountPageState extends State<AccountPage> {
             side: BorderSide(color: Colors.red.shade200),
             padding: const EdgeInsets.symmetric(vertical: 14),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Account Deletion (Apple requirement)
+        TextButton(
+          onPressed: () => _confirmDeleteAccount(t),
+          child: Text(
+            'Delete My Account',
+            style: TextStyle(color: Colors.red.shade400, fontSize: 13, fontWeight: FontWeight.w500),
           ),
         ),
       ],
