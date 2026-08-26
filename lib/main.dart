@@ -100,7 +100,7 @@ class _IndianInfoAppState extends State<IndianInfoApp> {
     }
 
     return MaterialApp(
-      title: 'Indian Information',
+      title: 'India Informations',
       debugShowCheckedModeBanner: false,
       theme: buildIndianInformationTheme(),
       darkTheme: buildIndianInformationDarkTheme(),

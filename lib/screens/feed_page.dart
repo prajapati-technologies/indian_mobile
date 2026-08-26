@@ -153,7 +153,7 @@ class _FeedPageState extends State<FeedPage> {
             fit: BoxFit.contain,
             alignment: Alignment.centerLeft,
             errorBuilder: (_, _, _) => Text(
-              'Indian Information',
+              'India Informations',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: AppColors.brandNavy,
                     fontWeight: FontWeight.w700,

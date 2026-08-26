@@ -31,7 +31,7 @@ class LocationService {
     );
     final response = await http.get(
       url,
-      headers: {'User-Agent': 'IndianInformationApp/1.0'},
+      headers: {'User-Agent': 'IndiaInformationsApp/1.0'},
     );
 
     if (response.statusCode != 200) {

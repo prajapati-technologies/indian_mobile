@@ -199,7 +199,7 @@ out body $limit;
         );
         final nomResponse = await http.get(
           nominatimUrl,
-          headers: {'User-Agent': 'IndianInformationApp/1.0'},
+          headers: {'User-Agent': 'IndiaInformationsApp/1.0'},
         );
 
         if (nomResponse.statusCode == 200) {

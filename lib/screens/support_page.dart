@@ -4,9 +4,28 @@ import 'package:url_launcher/url_launcher.dart';
 class SupportPage extends StatelessWidget {
   const SupportPage({super.key});
 
+  // Developer / Publisher info (must match Play Console)
+  static const String developerName = 'India Informations';
+  static const String developerEmail = 'contact@indiainformations.com';
+  static const String developerWebsite = 'https://indiainformations.com';
+  static const String developerAddress = 'India';
+  static const String appVersion = '1.0.0';
+
   Future<void> _launchUrl(String url) async {
-    if (!await launchUrl(Uri.parse(url))) {
-      throw Exception('Could not launch $url');
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  Future<void> _launchEmail() async {
+    final uri = Uri(
+      scheme: 'mailto',
+      path: developerEmail,
+      queryParameters: {'subject': 'India Informations App - Support Request'},
+    );
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
     }
   }
 
@@ -38,62 +57,128 @@ class SupportPage extends StatelessWidget {
               style: TextStyle(color: Colors.grey, fontSize: 14),
             ),
             const SizedBox(height: 30),
-            
+
+            // Contact options
             _supportCard(
               context,
               icon: Icons.email_outlined,
               title: 'Email Us',
-              subtitle: 'support@indianinformation.com',
+              subtitle: developerEmail,
               color: Colors.blue,
-              onTap: () => _launchUrl('mailto:support@indianinformation.com'),
+              onTap: _launchEmail,
             ),
             _supportCard(
               context,
-              icon: Icons.chat_bubble_outline,
-              title: 'WhatsApp Support',
-              subtitle: 'Chat with our team directly',
-              color: Colors.green,
-              onTap: () => _launchUrl('https://wa.me/910000000000'), // Placeholder
+              icon: Icons.language_rounded,
+              title: 'Visit Website',
+              subtitle: developerWebsite,
+              color: Colors.teal,
+              onTap: () => _launchUrl(developerWebsite),
             ),
             _supportCard(
               context,
-              icon: Icons.help_outline,
-              title: 'Frequently Asked Questions',
-              subtitle: 'Find quick answers to common issues',
-              color: Colors.orange,
-              onTap: () {
-                // Show some FAQ or navigate to FAQ page
-              },
+              icon: Icons.privacy_tip_outlined,
+              title: 'Privacy Policy',
+              subtitle: 'How we handle your data',
+              color: Colors.deepPurple,
+              onTap: () => _launchUrl('$developerWebsite/app-privacy-policy.html'),
             ),
-            
-            const SizedBox(height: 40),
-            const Text(
-              'Follow Us',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 15),
-            Row(
-              children: [
-                _socialCircle(Icons.facebook, Colors.blue[800]!, 'https://facebook.com'),
-                const SizedBox(width: 15),
-                _socialCircle(Icons.camera_alt, Colors.pink, 'https://instagram.com'),
-                const SizedBox(width: 15),
-                _socialCircle(Icons.language, Colors.blue, 'https://indianinformation.com'),
-              ],
-            ),
-            
-            const SizedBox(height: 50),
-            Center(
+
+            const SizedBox(height: 36),
+
+            // Developer Information Section (required for Play Store 1.5.0)
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFE5E7EB)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Indian Information Super App', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
-                  const SizedBox(height: 5),
-                  Text('Version 1.0.0 (Build 1)', style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0F2C59).withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.info_outline_rounded, color: Color(0xFF0F2C59), size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Developer Information',
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFF0F2C59)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  _devInfoRow(Icons.business_rounded, 'Developer', developerName),
+                  _devInfoRow(Icons.email_rounded, 'Email', developerEmail),
+                  _devInfoRow(Icons.language_rounded, 'Website', developerWebsite),
+                  _devInfoRow(Icons.location_on_rounded, 'Address', developerAddress),
                 ],
               ),
             ),
+
+            const SizedBox(height: 36),
+
+            // App Info Footer
+            Center(
+              child: Column(
+                children: [
+                  const Text(
+                    'India Informations',
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F2C59), fontSize: 15),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Version $appVersion',
+                    style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '\u00A9 2026 $developerName. All Rights Reserved.',
+                    style: TextStyle(color: Colors.grey[400], fontSize: 11),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _devInfoRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: Colors.grey[600]),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[500], fontWeight: FontWeight.w600)),
+                const SizedBox(height: 2),
+                Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF1F2937))),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -119,20 +204,6 @@ class SupportPage extends StatelessWidget {
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
         trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
-      ),
-    );
-  }
-
-  Widget _socialCircle(IconData icon, Color color, String url) {
-    return InkWell(
-      onTap: () => _launchUrl(url),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, color: color, size: 24),
       ),
     );
   }
