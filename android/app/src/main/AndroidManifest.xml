@@ -3,7 +3,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <application
-        android:label="Indian Information"
+        android:label="India Informations"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="false"
@@ -36,7 +36,7 @@
             android:name="flutterEmbedding"
             android:value="2" />
         
-        <!-- Sample AdMob App ID -->
+        <!-- AdMob App ID (TEST ID until app is approved - replace with real ID after approval) -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3940256099942544~3347511713"/>

@@ -1,53 +1,32 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:flutter/foundation.dart';
 
 class AdService {
-  // Real AdMob IDs for production
+  // NOTE: Using Google's official TEST ad unit IDs until the app is approved.
+  // After approval, replace these with your real AdMob ad unit IDs.
+  // (Wrap them in a `if (kReleaseMode)` check and put real IDs there.)
+
   static String get bannerAdUnitId {
-    if (kReleaseMode) {
-      return Platform.isAndroid
-          ? 'ca-app-pub-5974275212869662/8776700333'
-          : 'ca-app-pub-5974275212869662/8776700333';
-    }
-    // Test IDs for debug mode
     return Platform.isAndroid
         ? 'ca-app-pub-3940256099942544/6300978111'
         : 'ca-app-pub-3940256099942544/2934735716';
   }
 
   static String get interstitialAdUnitId {
-    if (kReleaseMode) {
-      // Replace with your real Interstitial Ad ID
-      return Platform.isAndroid
-          ? 'ca-app-pub-3940256099942544/1033173712'
-          : 'ca-app-pub-3940256099942544/4411468910';
-    }
     return Platform.isAndroid
         ? 'ca-app-pub-3940256099942544/1033173712'
         : 'ca-app-pub-3940256099942544/4411468910';
   }
 
   static String get rewardedAdUnitId {
-    if (kReleaseMode) {
-      // Replace with your real Rewarded Ad ID
-      return Platform.isAndroid
-          ? 'ca-app-pub-3940256099942544/5224354917'
-          : 'ca-app-pub-3940256099942544/1712485313';
-    }
     return Platform.isAndroid
         ? 'ca-app-pub-3940256099942544/5224354917'
         : 'ca-app-pub-3940256099942544/1712485313';
   }
 
   static String get nativeAdUnitId {
-    if (kReleaseMode) {
-      // Replace with your real Native Ad ID
-      return Platform.isAndroid
-          ? 'ca-app-pub-3940256099942544/2247696110'
-          : 'ca-app-pub-3940256099942544/3986624511';
-    }
     return Platform.isAndroid
         ? 'ca-app-pub-3940256099942544/2247696110'
         : 'ca-app-pub-3940256099942544/3986624511';

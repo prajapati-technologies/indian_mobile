@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/api_service.dart';
 import '../widgets/auth_layout.dart';
 import 'register_page.dart';
@@ -127,6 +128,21 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> _handleForgotPassword() async {
+    final uri = Uri(
+      scheme: 'mailto',
+      path: 'contact@indiainformations.com',
+      queryParameters: {'subject': 'Password Reset Request'},
+    );
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please email contact@indiainformations.com to reset your password.')),
+      );
+    }
+  }
+
   String _parseError(String body) {
     try {
       final m = json.decode(body) as Map<String, dynamic>;
@@ -239,7 +255,7 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: _handleForgotPassword,
                   child: const Text(
                     'Forgot Password?',
                     style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 13),
