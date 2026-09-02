@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../widgets/frosted_container.dart';
 import '../../providers/local_explorer_provider.dart';
 import '../../models/place_model.dart';
@@ -263,8 +264,11 @@ class PlaceDetailScreen extends StatelessWidget {
         _buildActionButton(context, Icons.call, 'Call', Colors.green, () async {
           if (place.phone != null) await launchUrl(Uri.parse('tel:${place.phone}'));
         }),
-        _buildActionButton(context, Icons.share, 'Share', Colors.orange, () {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Share feature coming soon')));
+        _buildActionButton(context, Icons.share, 'Share', Colors.orange, () async {
+          await Share.share(
+            '${place.name}\n${place.address}\nhttps://www.google.com/maps?q=${place.lat},${place.lng}',
+            subject: place.name,
+          );
         }),
         _buildActionButton(
           context,

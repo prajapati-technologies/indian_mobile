@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../widgets/frosted_container.dart';
 import '../../providers/local_explorer_provider.dart';
@@ -293,8 +294,11 @@ class _CategoryPlacesScreenState extends State<CategoryPlacesScreen> {
                       _actionButton(Icons.directions, 'Directions', Colors.blue, () async {
                         await launchUrl(Uri.parse('https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}'));
                       }),
-                      _actionButton(Icons.share, 'Share', Colors.orange, () {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Share feature coming soon')));
+                      _actionButton(Icons.share, 'Share', Colors.orange, () async {
+                        await Share.share(
+                          '${place.name}\n${place.address}\nhttps://www.google.com/maps?q=${place.lat},${place.lng}',
+                          subject: place.name,
+                        );
                       }),
                       _actionButton(
                         place.isFavorite ? Icons.favorite : Icons.favorite_border,

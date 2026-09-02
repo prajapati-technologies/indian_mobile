@@ -7,7 +7,6 @@ import '../../widgets/frosted_container.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../providers/local_explorer_provider.dart';
 import '../../models/place_model.dart';
-import '../../theme/app_theme.dart';
 import 'place_detail_screen.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -106,12 +105,6 @@ class _SearchScreenState extends State<SearchScreen> {
                   _searchFocus.requestFocus();
                 },
               ),
-            IconButton(
-              icon: Icon(Icons.mic, color: AppColors.brandNavy),
-              onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Voice search coming soon')),
-              ),
-            ),
           ],
         ),
       ),
